@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JigsawPuzzles.io — propuesta de rediseño</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400;12..96,75..100,600;12..96,75..100,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;450;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F2ED;
+  --board:#E4E0D6;
+  --board-2:#D6D1C2;
+  --rule:#C6C0B0;
+  --rule-soft:#DAD5C8;
+  --ink:#191B17;
+  --ink-2:#4A4E45;
+  --ink-3:#63685D;
+  --felt:#2E4A3C;
+  --felt-2:#3D6250;
+  --felt-ink:#E8EEE8;
+  --brass:#8A6E2F;
+
+  --display:'Bricolage Grotesque',system-ui,sans-serif;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--board);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--felt);outline-offset:3px}
+
+.shell{max-width:1200px;margin:0 auto;padding:0 40px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.lede{font-size:19px;line-height:1.6;color:var(--ink-2);max-width:60ch}
+.prose{color:var(--ink-2);max-width:66ch}
+.prose+.prose{margin-top:16px}
+.prose b{font-weight:600;color:var(--ink)}
+.tt{font-family:var(--mono);font-size:.86em;background:var(--board);padding:1px 5px;border-radius:3px;color:var(--ink-2)}
+
+/* ============ hero ============ */
+.hero{padding:88px 0 96px}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:72px;align-items:end}
+.hero h1{font-family:var(--display);font-weight:800;font-size:clamp(38px,5.4vw,64px);line-height:.98;letter-spacing:-.03em;font-variation-settings:'wdth' 85;max-width:16ch;margin:22px 0 26px}
+.hero h1 .swap{color:var(--felt)}
+.hero-meta{display:flex;gap:28px;margin-top:32px;padding-top:22px;border-top:1px solid var(--rule)}
+.hero-meta div{font-family:var(--mono);font-size:12px;color:var(--ink-3);line-height:1.5}
+.hero-meta strong{display:block;font-family:var(--display);font-size:26px;font-weight:600;color:var(--ink);letter-spacing:-.02em}
+.hero-fig figcaption{font-family:var(--mono);font-size:12px;color:var(--ink-3);margin-top:14px;line-height:1.55;max-width:34ch}
+
+/* ============ matriz de piezas ============ */
+.mx{display:grid;line-height:0}
+.mx i{display:block;background:var(--rule-soft);border-radius:1px}
+.mx i.on{background:var(--felt)}
+.mx.anim i{opacity:0;transform:scale(.4)}
+.mx.anim.go i{opacity:1;transform:none;transition:opacity .34s ease,transform .34s cubic-bezier(.2,.9,.3,1.4)}
+.mx.k i{border-radius:.5px}
+
+/* ============ secciones ============ */
+.sec{padding:80px 0;border-top:1px solid var(--rule)}
+.sec-head{display:grid;grid-template-columns:220px 1fr;gap:56px;margin-bottom:44px}
+.sec-head h2{font-family:var(--display);font-size:34px;font-weight:600;letter-spacing:-.025em;line-height:1.1;font-variation-settings:'wdth' 90}
+.sec-head .eyebrow{padding-top:10px}
+
+/* ---- dos vías: observación / respuesta ---- */
+.track{display:grid;grid-template-columns:220px 1fr;gap:56px;padding:26px 0;border-top:1px solid var(--rule-soft)}
+.track:first-of-type{border-top:0}
+.track-obs{font-size:14.5px;color:var(--ink-3);line-height:1.55}
+.track-obs b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;font-weight:400}
+.track-res h3{font-family:var(--display);font-size:20px;font-weight:600;letter-spacing:-.015em;margin-bottom:7px}
+.track-res p{color:var(--ink-2);font-size:15.5px;max-width:62ch}
+
+/* ---- materiales ---- */
+.mats{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--rule);border:1px solid var(--rule)}
+.mat{background:var(--paper);padding:0}
+.mat .swatch{height:130px;display:flex;align-items:flex-end;padding:12px}
+.mat .swatch span{font-family:var(--mono);font-size:11px}
+.mat .body{padding:16px 18px 20px}
+.mat h4{font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:-.01em}
+.mat p{font-size:13.5px;color:var(--ink-3);line-height:1.5;margin-top:5px}
+
+/* ---- tipografía ---- */
+.type-row{display:grid;grid-template-columns:220px 1fr;gap:56px;align-items:baseline;padding:22px 0;border-top:1px solid var(--rule-soft)}
+.type-row:first-of-type{border-top:0}
+.type-row .k{font-family:var(--mono);font-size:12px;color:var(--ink-3);line-height:1.5}
+
+/* ---- navegación antes/después ---- */
+.nav-cmp{display:grid;grid-template-columns:1fr 1.25fr;gap:2px;background:var(--rule);border:1px solid var(--rule)}
+.nav-col{background:var(--paper);padding:26px 28px}
+.nav-col h4{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:18px;font-weight:400}
+.nav-col ul{list-style:none}
+.nav-col li{padding:8px 0;border-bottom:1px solid var(--rule-soft);font-size:14.5px;color:var(--ink-3)}
+.nav-col li:last-child{border-bottom:0}
+.nav-col li s{text-decoration-color:var(--rule)}
+.nav-col.keep li{color:var(--ink);display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:baseline}
+.nav-col.keep li em{font-style:normal;font-family:var(--display);font-weight:600;font-size:16px}
+.nav-col.keep li span{font-size:14px;color:var(--ink-3)}
+
+/* ============ mesa: pantallas sobre fieltro ============ */
+.table{background:var(--felt);color:var(--felt-ink);padding:80px 0 92px}
+.table .eyebrow,.table .sec-head .eyebrow{color:rgba(232,238,232,.6)}
+.table .sec-head h2{color:var(--felt-ink)}
+.table .prose{color:rgba(232,238,232,.78)}
+.table .sec-head{margin-bottom:40px}
+.shot{margin-top:56px}
+.shot:first-of-type{margin-top:0}
+.shot-cap{display:grid;grid-template-columns:220px 1fr;gap:56px;margin-bottom:16px;align-items:baseline}
+.shot-cap h3{font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:-.015em;color:var(--felt-ink)}
+.shot-cap p{font-size:14px;color:rgba(232,238,232,.65);max-width:58ch}
+.pane{border-radius:10px;overflow:hidden;background:var(--paper);color:var(--ink)}
+.shot-notes{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:22px}
+.shot-notes div{border-top:1px solid rgba(232,238,232,.22);padding-top:12px}
+.shot-notes h5{font-size:14px;font-weight:600;color:var(--felt-ink);margin-bottom:5px}
+.shot-notes p{font-size:13.5px;color:rgba(232,238,232,.68);line-height:1.5}
+
+/* ============ interfaz de la app ============ */
+.app{font-size:14px}
+.app-bar{display:flex;align-items:center;gap:30px;padding:0 22px;height:58px;border-bottom:1px solid var(--rule)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:17px;letter-spacing:-.02em;font-variation-settings:'wdth' 88}
+.brand .mx{gap:1.5px}
+.app-nav{display:flex;gap:24px;align-self:stretch;align-items:center}
+.app-nav a{font-size:14.5px;color:var(--ink-3);text-decoration:none;padding:19px 0;border-bottom:2px solid transparent;margin-bottom:-1px}
+.app-nav a:hover{color:var(--ink)}
+.app-nav a.on{color:var(--ink);font-weight:600;border-bottom-color:var(--felt)}
+.grow{flex:1}
+.seek{display:flex;align-items:center;gap:9px;height:34px;padding:0 12px;border:1px solid var(--rule);border-radius:5px;color:var(--ink-3);font-size:13.5px;min-width:210px;background:var(--paper)}
+.seek kbd{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.who{width:30px;height:30px;border-radius:50%;background:var(--board-2);display:grid;place-items:center;font-size:11.5px;font-weight:600;color:var(--ink-2);flex:none}
+
+.b{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border:1px solid var(--rule);background:transparent;border-radius:5px;font:450 13.5px var(--sans);color:var(--ink);cursor:pointer;white-space:nowrap}
+.b:hover{background:var(--board);border-color:var(--ink-3)}
+.b--fill{background:var(--ink);border-color:var(--ink);color:var(--paper);font-weight:600}
+.b--fill:hover{background:var(--felt);border-color:var(--felt)}
+.b--sm{height:29px;padding:0 11px;font-size:13px}
+.b--ic{width:34px;padding:0;justify-content:center}
+
+.tag{display:inline-flex;align-items:center;gap:6px;height:29px;padding:0 12px;border:1px solid var(--rule);border-radius:14px;font-size:13px;color:var(--ink-2);background:transparent;cursor:pointer;white-space:nowrap}
+.tag:hover{border-color:var(--ink-3)}
+.tag--on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.tag--n{font-family:var(--mono);font-size:11.5px;opacity:.6}
+.pro{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--brass);border:1px solid rgba(138,110,47,.4);border-radius:3px;padding:2px 6px}
+
+.tile{background:var(--paper);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.tile:hover{border-color:var(--ink-3)}
+.img{background:var(--board-2);position:relative}
+.img::after{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--rule-soft) 1px,transparent 1px),linear-gradient(90deg,var(--rule-soft) 1px,transparent 1px);background-size:22px 22px;opacity:.5}
+.stamp{position:absolute;z-index:1;top:9px;left:9px;font-family:var(--mono);font-size:11px;background:var(--paper);border:1px solid var(--rule);border-radius:3px;padding:2px 7px}
+.mono{font-family:var(--mono)}
+.dim{color:var(--ink-3)}
+.tiny{font-size:12.5px}
+.row{display:flex;align-items:center}
+.cap{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.pip{width:7px;height:7px;border-radius:50%;flex:none;background:var(--felt)}
+
+.sw{width:34px;height:19px;border-radius:10px;background:var(--rule);position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:2.5px;left:2.5px;width:14px;height:14px;border-radius:50%;background:var(--paper)}
+.sw--on{background:var(--felt)}
+.sw--on::after{left:17.5px}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:14px;padding:1px 0}
+.opt small{display:block;font-size:12.5px;color:var(--ink-3);margin-top:1px}
+
+/* tablero de partida */
+.play{position:relative;height:470px;background:var(--felt)}
+.pad{position:absolute;background:var(--paper);border-radius:7px}
+.dock{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:5px;background:var(--paper);border-radius:8px}
+.dock button{border:0;background:transparent;font:450 13px var(--sans);color:var(--ink-2);display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 11px;border-radius:5px;cursor:pointer}
+.dock button:hover{background:var(--board)}
+.dock .div{width:1px;height:19px;background:var(--rule);margin:0 5px}
+.shelf{position:absolute;left:0;right:0;bottom:0;height:92px;background:rgba(0,0,0,.16);display:flex;align-items:center;gap:2px;padding:0 20px;overflow:hidden}
+.jig{width:72px;height:72px;flex:none}
+[data-piece],[data-ghost],[data-mark]{display:inline-block;line-height:0}
+[data-piece] svg,[data-ghost] svg,[data-mark] svg{width:100%;height:100%;display:block;overflow:visible}
+
+.list{border-top:1px solid var(--rule-soft)}
+.list-row{display:flex;align-items:center;gap:18px;padding:14px 6px;border-bottom:1px solid var(--rule-soft)}
+.list-row:hover{background:var(--board)}
+.stat{border-left:1px solid var(--rule);padding:0 0 0 16px}
+.stat .k{font-size:12.5px;color:var(--ink-3)}
+.stat .v{font-family:var(--display);font-size:29px;font-weight:600;letter-spacing:-.025em;line-height:1.15;margin-top:3px}
+.stat .n{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+
+/* ============ cierre ============ */
+.adds{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--rule);border:1px solid var(--rule)}
+.add{background:var(--paper);padding:22px 24px 26px}
+.add h4{font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
+.add p{font-size:13.5px;color:var(--ink-3);line-height:1.55}
+.colofon{padding:44px 0 72px;font-family:var(--mono);font-size:12px;color:var(--ink-3);line-height:1.7}
+
+/* ============ teléfono ============ */
+.phones{display:grid;grid-template-columns:repeat(3,360px);gap:20px;justify-content:space-between}
+.phones+.phones{margin-top:44px}
+.ph{width:360px;height:772px;border-radius:34px;overflow:hidden;background:var(--paper);color:var(--ink);position:relative;display:flex;flex-direction:column;font-size:14px}
+.ph--felt{background:var(--felt);color:var(--felt-ink)}
+.ph-st{flex:none;height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.ph--felt .ph-st{color:rgba(232,238,232,.65)}
+.ph-top{flex:none;display:flex;align-items:center;gap:9px;padding:2px 18px 14px}
+.ph-body{flex:1;min-height:0;position:relative;overflow:hidden}
+.ph-pad{padding:0 18px}
+.ph-tabs{flex:none;height:64px;padding-bottom:12px;border-top:1px solid var(--rule);display:flex;align-items:center}
+.ph-tab{flex:1;text-align:center;font-size:12px;color:var(--ink-3);position:relative;padding-top:4px}
+.ph-tab--on{color:var(--ink);font-weight:600}
+.ph-tab--on::before{content:"";position:absolute;top:-8px;left:50%;margin-left:-3px;width:6px;height:6px;border-radius:1px;background:var(--felt)}
+.ph-home{position:absolute;left:50%;bottom:7px;transform:translateX(-50%);width:118px;height:4px;border-radius:2px;background:var(--rule)}
+.ph--felt .ph-home{background:rgba(232,238,232,.28)}
+.ph-cap{font-family:var(--mono);font-size:11px;color:rgba(232,238,232,.62);line-height:1.55;margin-top:12px}
+.ph-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--paper);color:var(--ink)}
+.ph-tray{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:16px 16px 0 0;padding:9px 14px 16px}
+.ph-grip{width:38px;height:4px;border-radius:2px;background:var(--rule);margin:0 auto 11px}
+.ph-jigs{display:flex;gap:1px;overflow:hidden}
+.ph-jig{width:72px;height:72px;flex:none}
+.ph-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.ph-grid .ph-jig{width:100%;height:auto;aspect-ratio:1}
+.ph-sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:18px 18px 0 0;padding:10px 20px 22px}
+.land{width:100%;max-width:740px;height:352px;border-radius:30px;overflow:hidden;background:var(--felt);position:relative;display:flex}
+.land-tray{width:170px;flex:none;background:var(--paper);padding:12px 10px;display:flex;flex-direction:column;gap:8px}
+.land-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.land-grid span{width:100%;aspect-ratio:1}
+
+@media (max-width:1180px){
+  .phones{grid-template-columns:repeat(2,360px);justify-content:center;gap:24px}
+}
+@media (max-width:1000px){
+  .shell{padding:0 22px}
+  .phones{grid-template-columns:360px;justify-content:center}
+  .hero-grid,.sec-head,.track,.type-row,.shot-cap{grid-template-columns:1fr;gap:20px}
+  .hero-fig{order:-1}
+  .mats,.adds,.shot-notes{grid-template-columns:1fr}
+  .nav-cmp{grid-template-columns:1fr}
+  .pane{overflow-x:auto}
+  .app{min-width:960px}
+}
+@media (prefers-reduced-motion:reduce){
+  .mx.anim i,.mx.anim.go i{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================= HERO ======================= -->
+<header class="hero">
+  <div class="shell hero-grid">
+    <div>
+      <p class="eyebrow">Propuesta de rediseño · maqueta no funcional</p>
+      <h1>Un puzzle se arma en una mesa, no en una <span class="swap">consola</span>.</h1>
+      <p class="lede">JigsawPuzzles.io se ve hoy como un juego de disparos: fondo negro, botones azules saturados, tres barras de herramientas flotando sobre el tablero. Pero armar un puzzle es lento, diurno y táctil, y muchas veces se hace acompañado. Esta propuesta reescribe la interfaz con los materiales del objeto real.</p>
+      <div class="hero-meta">
+        <div><strong>11 → 4</strong>destinos de navegación</div>
+        <div><strong>3 → 1</strong>barras en partida</div>
+        <div><strong>5 → 2</strong>colores en el sistema</div>
+      </div>
+    </div>
+    <figure class="hero-fig">
+      <div class="mx anim" data-cols="30" data-rows="21" data-pct="64" data-cell="11" data-gap="2" data-stagger="9"></div>
+      <figcaption>Progreso de una partida real: 142 de 221 piezas. Se llena por el borde hacia adentro, como se arma de verdad.</figcaption>
+    </figure>
+  </div>
+</header>
+
+<!-- ======================= DIAGNÓSTICO ======================= -->
+<section class="sec">
+  <div class="shell">
+    <div class="sec-head">
+      <p class="eyebrow">Lo que vi</p>
+      <div>
+        <h2>Cuatro problemas, ninguno de gusto</h2>
+        <p class="prose" style="margin-top:14px">A la izquierda, lo que muestran las capturas. A la derecha, qué hago con eso.</p>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-obs"><b>Capturas 1, 2 y 3</b>«Catalog» abre el <span class="tt">Puzzle Explorer</span>, que enlaza al <span class="tt">classic catalog</span>. «My Puzzles» suma ocho pestañas, todas vacías, con el pie de página flotando a media altura.</div>
+      <div class="track-res">
+        <h3>Tres nombres para una sola cosa</h3>
+        <p>Catálogo, explorador y catálogo clásico se funden en <b>Biblioteca</b>, con el buscador semántico como vista por defecto porque ya funciona bien. Las ocho pestañas bajan a cuatro filtros dentro de <b>Mis puzzles</b>.</p>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-obs"><b>Captura 1</b>Banner naranja de suscripción, icono de Discord suelto sin contexto, un renglón de estadísticas en serif cursiva que no pertenece a ningún sistema, y las mesas en vivo con texto blanco encima de la foto.</div>
+      <div class="track-res">
+        <h3>La portada compite consigo misma</h3>
+        <p>El texto sale de la imagen y baja a la ficha, donde el contraste está garantizado. El banner de suscripción se retira: Pro se ofrece donde se usa, junto a la resolución alta y a los tamaños grandes. Y lo primero que ve quien vuelve pasa a ser <b>el puzzle que dejó a medias</b>.</p>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-obs"><b>Capturas 6 y 7</b>El diálogo de configuración se superpone justo sobre el gato que estás eligiendo. El campo dice <span class="tt">300</span> y el resultado son 336 piezas, con un <span class="tt">(?)</span> al lado para justificarlo. Las dos resoluciones aparecen en gris, sin explicar por qué.</div>
+      <div class="track-res">
+        <h3>El número que escribís nunca es el que obtenés</h3>
+        <p>La configuración pasa a un panel lateral: la imagen nunca se tapa. Los tamaños son <b>recuentos exactos</b> de la grilla, así el signo de interrogación deja de hacer falta. La resolución alta se vuelve un interruptor con su etiqueta Pro visible.</p>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-obs"><b>Capturas 8, 9 y 10</b>Barra de herramientas arriba al centro, marcador arriba a la derecha recortado fuera de la ventana, chat abajo a la izquierda sin contenedor. El engranaje mezcla ajustes de partida con la tabla de jugadores.</div>
+      <div class="track-res">
+        <h3>Tres interfaces sobre un mismo tablero</h3>
+        <p>Todo se consolida: progreso arriba a la izquierda, jugadores arriba a la derecha, herramientas en un solo muelle abajo. Las piezas sueltas dejan de rodear el marco y bajan a una bandeja, así el tablero queda limpio.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= MATERIALES ======================= -->
+<section class="sec">
+  <div class="shell">
+    <div class="sec-head">
+      <p class="eyebrow">Materiales</p>
+      <div>
+        <h2>La paleta sale de la caja, no de una tendencia</h2>
+        <p class="prose" style="margin-top:14px">Cuatro superficies tomadas del objeto físico: el cartón gris del dorso de la pieza, el papel de la tapa, el fieltro del tapete y el latón de las cajas estampadas. <b>No hay color de marca.</b> La acción primaria es tinta negra; el verde aparece únicamente donde hay superficie de juego o progreso, así que cuando lo ves, significa algo.</p>
+      </div>
+    </div>
+
+    <div class="mats">
+      <div class="mat">
+        <div class="swatch" style="background:#E4E0D6"><span>#E4E0D6</span></div>
+        <div class="body"><h4>Cartón</h4><p>Lienzo de la página. El gris cálido del dorso troquelado, no un crema editorial.</p></div>
+      </div>
+      <div class="mat">
+        <div class="swatch" style="background:#F4F2ED"><span>#F4F2ED</span></div>
+        <div class="body"><h4>Papel</h4><p>Tarjetas, paneles y la interfaz entera. La jerarquía se resuelve por material, no por sombras.</p></div>
+      </div>
+      <div class="mat">
+        <div class="swatch" style="background:#2E4A3C"><span style="color:#E8EEE8">#2E4A3C</span></div>
+        <div class="body"><h4>Fieltro</h4><p>El tapete. Es el tablero de juego, el progreso y el punto de «en vivo». Nada más.</p></div>
+      </div>
+      <div class="mat">
+        <div class="swatch" style="background:#8A6E2F"><span style="color:#F4F2ED">#8A6E2F</span></div>
+        <div class="body"><h4>Latón</h4><p>Solo suscripción. Aparece estampado junto a la función que la requiere, nunca como banner.</p></div>
+      </div>
+    </div>
+
+    <div class="track" style="border-top:1px solid var(--rule-soft);margin-top:48px">
+      <div class="track-obs"><b>El riesgo asumido</b>Toda la categoría es oscura, incluida la versión actual del sitio.</div>
+      <div class="track-res">
+        <h3>Interfaz clara por defecto</h3>
+        <p>Un fondo negro con acento fluor es el idioma de un juego de acción y agota en sesiones de una hora. La interfaz es clara y el <b>fieltro queda reservado al tablero</b>, que es la única parte donde conviene que la vista descanse y las imágenes destaquen. Queda modo nocturno para el tablero, no para el sitio.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= LA PIEZA ======================= -->
+<section class="sec">
+  <div class="shell">
+    <div class="sec-head">
+      <p class="eyebrow">Elemento distintivo</p>
+      <div>
+        <h2>La pieza como unidad de medida</h2>
+        <p class="prose" style="margin-top:14px">Desaparecen todas las barras de progreso. En su lugar, una <b>matriz de piezas</b> con la proporción real del puzzle que se llena por el borde hacia adentro. Dice cuánto llevás y también por dónde vas, con la forma del propio objeto. Se repite en tres escalas y es lo único que hace el verde en toda la interfaz.</p>
+      </div>
+    </div>
+
+    <div class="track" style="border-top:1px solid var(--rule-soft)">
+      <div class="track-obs">
+        <div style="display:flex;gap:2px;margin-bottom:10px">
+          <span data-piece style="width:66px;height:66px"></span>
+          <span data-piece style="width:66px;height:66px"></span>
+          <span data-piece style="width:66px;height:66px"></span>
+        </div>
+        <b style="margin:0">Troquel · lengüeta y hueco</b>
+      </div>
+      <div class="track-res">
+        <h3>Ninguna pieza es un cuadrado</h3>
+        <p>Cada lado son <b>tres curvas de Bézier</b> con los puntos de control del generador de Manuel Kasten, que es la referencia que usan los generadores de troquel para corte láser. La lengüeta mide el 22 % del lado y los dos puntos que cruzan al otro lado de la línea son los que <b>estrangulan el cuello</b>: sin ese socavado la pieza no agarra, y es exactamente lo que fallaba en mi primer intento a ojo.</p>
+        <p style="margin-top:12px">A eso se suma una variación del 4,5 % en cinco parámetros por lado, así que ninguna silueta se repite —las 48 de este documento son distintas— igual que en un troquel real, donde la matriz nunca corta dos piezas iguales.</p>
+      </div>
+    </div>
+    <div class="track">
+      <div class="track-obs">
+        <span data-mark="3" style="width:74px;height:74px;display:block;margin-bottom:10px"></span>
+        <b style="margin:0">Marca</b>
+      </div>
+      <div class="track-res"><h3>Una sola pieza como logotipo</h3><p>La marca es el objeto y la matriz es la medida. Mezclar las dos cosas en un mismo signo las volvía ilegibles a tamaño pequeño.</p></div>
+    </div>
+    <div class="track">
+      <div class="track-obs">
+        <div class="mx" data-cols="14" data-rows="10" data-pct="64" data-cell="5" data-gap="1"></div>
+        <div style="margin-top:10px"><b style="margin:0">Ficha · 14 × 10</b></div>
+      </div>
+      <div class="track-res"><h3>Ficha</h3><p>En cada tarjeta y cada fila de la lista, donde antes iba la barra. Ocupa lo mismo y dice más.</p></div>
+    </div>
+    <div class="track">
+      <div class="track-obs">
+        <div class="mx" data-cols="24" data-rows="16" data-pct="88" data-cell="6" data-gap="1.5"></div>
+        <div style="margin-top:10px"><b style="margin:0">Partida · 24 × 16</b></div>
+      </div>
+      <div class="track-res"><h3>Partida</h3><p>Como mapa del tablero en el indicador de progreso. Sirve para orientarse, no solo para medir.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= TIPOGRAFÍA ======================= -->
+<section class="sec">
+  <div class="shell">
+    <div class="sec-head">
+      <p class="eyebrow">Tipografía</p>
+      <div>
+        <h2>Tres roles, ninguno neutro</h2>
+        <p class="prose" style="margin-top:14px">El sitio actual mezcla una sans de interfaz, una serif cursiva para las estadísticas y una tercera cara redondeada en los rótulos de las mesas. Aquí cada familia tiene un trabajo: <b>Bricolage Grotesque</b> estrecha para los titulares, con esa irregularidad que la aleja de la neutralidad corporativa; <b>IBM Plex Sans</b> para la interfaz; y <b>IBM Plex Mono</b> para todo lo que es dato — piezas, tiempos, porcentajes — porque en un puzzle los números son instrumentos de medida.</p>
+      </div>
+    </div>
+    <div class="type-row"><div class="k">Bricolage Grotesque<br>800 · ancho 85 · −3 %</div><div style="font-family:var(--display);font-weight:800;font-size:52px;line-height:1;letter-spacing:-.03em;font-variation-settings:'wdth' 85">Mesas abiertas</div></div>
+    <div class="type-row"><div class="k">Bricolage Grotesque<br>600 · ancho 90</div><div style="font-family:var(--display);font-weight:600;font-size:26px;letter-spacing:-.02em;font-variation-settings:'wdth' 90">Gatos en la ventana</div></div>
+    <div class="type-row"><div class="k">IBM Plex Sans<br>400 · 16 / 1.6</div><div style="font-size:16px;max-width:52ch">Elegí cuántas piezas querés y quién puede entrar a la mesa.</div></div>
+    <div class="type-row"><div class="k">IBM Plex Sans<br>600 · 14</div><div style="font-size:14px;font-weight:600">Reanudar partida</div></div>
+    <div class="type-row"><div class="k">IBM Plex Mono<br>400 · 13</div><div class="mono" style="font-size:13px">142 / 221 · 64 % · 18:42</div></div>
+    <div class="type-row"><div class="k">IBM Plex Mono<br>400 · 11 · versalitas</div><div class="cap">Continuar donde lo dejaste</div></div>
+  </div>
+</section>
+
+<!-- ======================= NAVEGACIÓN ======================= -->
+<section class="sec">
+  <div class="shell">
+    <div class="sec-head">
+      <p class="eyebrow">Navegación</p>
+      <div>
+        <h2>Once destinos, cuatro lugares</h2>
+        <p class="prose" style="margin-top:14px">Nada se elimina. Lo que deja de ser una pestaña pasa a ser un filtro dentro de su contexto natural, o una acción en la ficha del puzzle donde de verdad se usa.</p>
+      </div>
+    </div>
+    <div class="nav-cmp">
+      <div class="nav-col">
+        <h4>Hoy</h4>
+        <ul>
+          <li><s>Catalog</s></li><li><s>Puzzle Explorer</s></li><li><s>classic catalog</s></li>
+          <li><s>My Puzzles › Statistics</s></li><li><s>In Progress</s></li><li><s>Complete</s></li>
+          <li><s>Archived</s></li><li><s>Custom</s></li><li><s>Reviews</s></li><li><s>Pins</s></li><li><s>Account</s></li>
+        </ul>
+      </div>
+      <div class="nav-col keep">
+        <h4>Propuesta</h4>
+        <ul>
+          <li><em>Jugar</em><span>Continuar, puzzle del día y mesas abiertas.</span></li>
+          <li><em>Biblioteca</em><span>Buscador por descripción; las categorías del catálogo clásico son filtros; <i>Custom</i> es el filtro «míos».</span></li>
+          <li><em>Mis puzzles</em><span>En curso · Completados · Guardados · Míos, con las estadísticas en la cabecera. <i>Archived</i> baja a filtro secundario.</span></li>
+          <li><em>Tu cuenta</em><span>Suscripción, ajustes y sesión, bajo el avatar. <i>Reviews</i> vuelve a la ficha del puzzle y <i>Pins</i> se llama «Guardados».</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= PANTALLAS (sobre fieltro) ======================= -->
+<section class="table">
+  <div class="shell">
+    <div class="sec-head">
+      <p class="eyebrow">Pantallas</p>
+      <div>
+        <h2 style="color:var(--felt-ink)">Cinco vistas sobre la mesa</h2>
+        <p class="prose">Maquetas construidas en HTML y CSS, no imágenes: los estados de hover funcionan. Las zonas con retícula representan las fotos del catálogo.</p>
+      </div>
+    </div>
+
+    <!-- ---------- 1 LOBBY ---------- -->
+    <div class="shot">
+      <div class="shot-cap"><h3>Jugar</h3><p>Lo primero que ve quien vuelve es la partida que dejó a medias, no una oferta de suscripción.</p></div>
+      <div class="pane"><div class="app">
+
+        <div class="app-bar">
+          <div class="brand"><span data-mark="3" style="width:32px;height:32px;margin:0 -4px"></span>jigsaw</div>
+          <nav class="app-nav"><a href="#" class="on">Jugar</a><a href="#">Biblioteca</a><a href="#">Mis puzzles</a></nav>
+          <span class="grow"></span>
+          <span class="seek">Buscar imágenes<kbd>⌘K</kbd></span>
+          <span class="pro">PRO</span>
+          <span class="who">AM</span>
+        </div>
+
+        <div style="padding:26px 22px 30px">
+
+          <div style="display:grid;grid-template-columns:1.75fr 1fr;gap:16px;margin-bottom:34px">
+            <div class="tile" style="display:flex">
+              <div class="img" style="width:186px;flex:none"></div>
+              <div style="padding:20px 22px;flex:1;display:flex;flex-direction:column">
+                <span class="cap">Continuar donde lo dejaste</span>
+                <h4 style="font-family:var(--display);font-size:23px;font-weight:600;letter-spacing:-.022em;margin:8px 0 auto">Gatos en la ventana</h4>
+                <div class="row" style="gap:18px;margin-top:20px">
+                  <span class="mx" data-cols="14" data-rows="10" data-pct="64" data-cell="4.5" data-gap="1"></span>
+                  <div class="mono tiny dim" style="line-height:1.7">142 / 221 piezas<br>18:42 · 2 jugadores</div>
+                  <span class="grow"></span>
+                  <button class="b b--fill">Reanudar</button>
+                </div>
+              </div>
+            </div>
+            <div class="tile" style="padding:20px 22px;display:flex;flex-direction:column">
+              <span class="cap">Puzzle del día</span>
+              <h4 style="font-family:var(--display);font-size:23px;font-weight:600;letter-spacing:-.022em;margin:8px 0 6px">Mercado de Lisboa</h4>
+              <p class="tiny dim">500 piezas · 1.284 personas lo armaron hoy</p>
+              <div class="row" style="gap:8px;margin-top:auto;padding-top:20px">
+                <button class="b b--fill">Jugar</button><button class="b">Ver tiempos</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row" style="gap:12px;margin-bottom:16px;flex-wrap:wrap">
+            <span class="pip"></span>
+            <h4 style="font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:-.02em">Mesas abiertas</h4>
+            <span class="mono tiny dim">37 ahora</span>
+            <span class="grow"></span>
+            <span class="tag tag--on">Todas</span><span class="tag">Con hueco</span><span class="tag">Menos de 300</span><span class="tag">Solo cuentas</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+            <div class="tile">
+              <div class="img" style="height:112px"><span class="stamp">1024 pz</span></div>
+              <div style="padding:14px 15px">
+                <h5 style="font-size:14.5px;font-weight:600;margin-bottom:11px">Carretes de hilo</h5>
+                <div class="row" style="gap:11px">
+                  <span class="mx" data-cols="12" data-rows="8" data-pct="34" data-cell="4" data-gap="1"></span>
+                  <div class="mono tiny dim" style="line-height:1.5">34 %<br>8 / 10</div>
+                </div>
+              </div>
+            </div>
+            <div class="tile">
+              <div class="img" style="height:112px"><span class="stamp">864 pz</span></div>
+              <div style="padding:14px 15px">
+                <h5 style="font-size:14.5px;font-weight:600;margin-bottom:11px">Mapa de Europa</h5>
+                <div class="row" style="gap:11px">
+                  <span class="mx" data-cols="12" data-rows="8" data-pct="3" data-cell="4" data-gap="1"></span>
+                  <div class="mono tiny dim" style="line-height:1.5">3 %<br>llena</div>
+                </div>
+              </div>
+            </div>
+            <div class="tile">
+              <div class="img" style="height:112px"><span class="stamp">1014 pz</span></div>
+              <div style="padding:14px 15px">
+                <h5 style="font-size:14.5px;font-weight:600;margin-bottom:11px">Cintas de colores</h5>
+                <div class="row" style="gap:11px">
+                  <span class="mx" data-cols="12" data-rows="8" data-pct="78" data-cell="4" data-gap="1"></span>
+                  <div class="mono tiny dim" style="line-height:1.5">78 %<br>1 / 10</div>
+                </div>
+              </div>
+            </div>
+            <div class="tile" style="border-style:dashed;display:grid;place-items:center;min-height:198px;cursor:pointer">
+              <div style="text-align:center">
+                <span class="mx" data-cols="6" data-rows="4" data-pct="0" data-cell="5" data-gap="1.5" style="margin:0 auto 12px"></span>
+                <span style="font-size:14px;font-weight:600">Abrir una mesa</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div></div>
+      <div class="shot-notes">
+        <div><h5>El regreso manda</h5><p>El dato más útil para quien vuelve hoy no aparece en ningún lado de la portada. Ahora ocupa la posición dominante.</p></div>
+        <div><h5>El texto sale de la foto</h5><p>Piezas, progreso y jugadores van bajo la imagen. Solo queda el sello de tamaño, sobre papel opaco.</p></div>
+        <div><h5>Filtros, no scroll</h5><p>«Con hueco» y «menos de 300» son las dos preguntas reales. La mesa llena se muestra, no se esconde.</p></div>
+      </div>
+    </div>
+
+    <!-- ---------- 2 BIBLIOTECA ---------- -->
+    <div class="shot">
+      <div class="shot-cap"><h3>Biblioteca</h3><p>El buscador por descripción ya funciona bien, así que pasa a ser la vista por defecto y absorbe al catálogo clásico.</p></div>
+      <div class="pane"><div class="app">
+
+        <div class="app-bar">
+          <div class="brand"><span data-mark="3" style="width:32px;height:32px;margin:0 -4px"></span>jigsaw</div>
+          <nav class="app-nav"><a href="#">Jugar</a><a href="#" class="on">Biblioteca</a><a href="#">Mis puzzles</a></nav>
+          <span class="grow"></span><span class="pro">PRO</span><span class="who">AM</span>
+        </div>
+
+        <div style="padding:26px 22px 30px">
+          <div class="row" style="gap:14px;border:1px solid var(--ink);border-radius:6px;padding:0 16px;height:48px;margin-bottom:18px">
+            <span style="font-size:16px">gato durmiendo junto a una ventana</span>
+            <span class="grow"></span>
+            <span class="pip"></span>
+            <span class="mono tiny" style="color:var(--felt)">40 coincidencias fuertes</span>
+          </div>
+
+          <div class="row" style="gap:8px;margin-bottom:20px;flex-wrap:wrap">
+            <span class="tag tag--on">Todo</span><span class="tag">Animales</span><span class="tag">Paisajes</span>
+            <span class="tag">Arte</span><span class="tag">Ciudades</span><span class="tag">Comida</span>
+            <span class="grow"></span>
+            <span class="tag">Piezas · Formato · 4K</span><span class="tag">Relevancia</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:118px;gap:14px">
+            <div class="tile" style="grid-row:span 2"><div class="img" style="height:100%"><span class="stamp">4K</span></div></div>
+            <div class="tile"><div class="img" style="height:100%"></div></div>
+            <div class="tile"><div class="img" style="height:100%"></div></div>
+            <div class="tile" style="grid-row:span 2"><div class="img" style="height:100%"></div></div>
+            <div class="tile"><div class="img" style="height:100%"></div></div>
+            <div class="tile" style="grid-column:span 2">
+              <div class="img" style="height:100%;display:flex;align-items:flex-end;padding:13px">
+                <div style="position:relative;z-index:1;background:var(--paper);border:1px solid var(--rule);border-radius:5px;padding:7px 11px">
+                  <div style="font-size:13.5px;font-weight:600">Gatos en la ventana</div>
+                  <div class="mono tiny dim" style="margin-top:2px">3,1 ★ · 2048 × 2731 · vertical</div>
+                </div>
+              </div>
+            </div>
+            <div class="tile"><div class="img" style="height:100%"></div></div>
+            <div class="tile"><div class="img" style="height:100%"><span class="stamp">4K</span></div></div>
+            <div class="tile"><div class="img" style="height:100%"></div></div>
+            <div class="tile"><div class="img" style="height:100%"></div></div>
+            <div class="tile"><div class="img" style="height:100%"></div></div>
+            <div class="tile"><div class="img" style="height:100%"></div></div>
+          </div>
+        </div>
+      </div></div>
+      <div class="shot-notes">
+        <div><h5>Un lugar, dos maneras</h5><p>Escribir una descripción o pulsar una categoría llevan al mismo sitio. Se acabaron los tres nombres.</p></div>
+        <div><h5>El aviso de calidad se encoge</h5><p>Ese bloque blanco que ocupaba el ancho entero pasa a ser una línea dentro del propio campo.</p></div>
+        <div><h5>El formato se respeta</h5><p>Las verticales ocupan dos filas en vez de recortarse. Importa: el formato define cómo queda el puzzle armado.</p></div>
+      </div>
+    </div>
+
+    <!-- ---------- 3 SETUP ---------- -->
+    <div class="shot">
+      <div class="shot-cap"><h3>Preparar la mesa</h3><p>Panel al lado, no diálogo encima. Estás eligiendo una imagen: taparla es lo peor que puede hacer la interfaz.</p></div>
+      <div class="pane"><div class="app" style="display:flex;height:552px">
+
+        <div style="flex:1;position:relative;background:var(--board-2)">
+          <div class="img" style="position:absolute;inset:0"></div>
+          <div style="position:absolute;inset:0;display:grid;place-items:center"><span class="mono tiny dim">vista previa a tamaño completo</span></div>
+          <button class="b" style="position:absolute;top:18px;left:18px;background:var(--paper)">← Biblioteca</button>
+          <div style="position:absolute;bottom:18px;left:18px;display:flex;gap:8px">
+            <button class="b" style="background:var(--paper)">Guardar</button>
+            <button class="b" style="background:var(--paper)">3,1 ★ · 12 reseñas</button>
+          </div>
+        </div>
+
+        <aside style="width:376px;flex:none;border-left:1px solid var(--rule);padding:26px;display:flex;flex-direction:column;gap:28px;overflow:auto">
+          <div>
+            <h4 style="font-family:var(--display);font-size:23px;font-weight:600;letter-spacing:-.022em">Gatos en la ventana</h4>
+            <p class="mono tiny dim" style="margin-top:4px">vertical · 2048 × 2731</p>
+          </div>
+
+          <div>
+            <div class="row" style="justify-content:space-between;margin-bottom:12px">
+              <span class="cap">Cuántas piezas</span><span class="mono tiny dim">unos 35 min</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px">
+              <span class="tag" style="justify-content:center">54</span>
+              <span class="tag" style="justify-content:center">120</span>
+              <span class="tag tag--on" style="justify-content:center">221</span>
+              <span class="tag" style="justify-content:center">500</span>
+            </div>
+            <div class="mx" data-cols="17" data-rows="13" data-pct="0" data-cell="6" data-gap="1.5" style="margin-bottom:12px"></div>
+            <p class="tiny dim">17 × 13 exactas. El número que elegís es el que obtenés — desaparece el «escribí 300, te doy 336».</p>
+          </div>
+
+          <div>
+            <span class="cap" style="display:block;margin-bottom:14px">Cómo se juega</span>
+            <div style="display:flex;flex-direction:column;gap:15px">
+              <div class="opt"><span>Piezas giradas<small>Sube bastante la dificultad</small></span><span class="sw"></span></div>
+              <div class="opt"><span>Ver la caja durante la partida<small>Apagalo y armás sin la imagen de referencia</small></span><span class="sw sw--on"></span></div>
+              <div class="opt"><span>Resolución alta <span class="pro" style="margin-left:5px">PRO</span><small>2048 × 2731 en vez de 1024</small></span><span class="sw sw--on"></span></div>
+            </div>
+          </div>
+
+          <div>
+            <span class="cap" style="display:block;margin-bottom:12px">Quién puede entrar</span>
+            <div class="row" style="gap:7px"><span class="tag tag--on">Solo yo</span><span class="tag">Con enlace</span><span class="tag">Cualquiera</span></div>
+            <p class="tiny dim" style="margin-top:9px">Se decide ahora, no a mitad de partida dentro de un engranaje.</p>
+          </div>
+
+          <div class="row" style="gap:8px;margin-top:auto">
+            <button class="b b--fill" style="flex:1;justify-content:center;height:42px">Empezar · 221 piezas</button>
+            <button class="b b--ic" style="height:42px;width:42px">＋</button>
+          </div>
+        </aside>
+      </div></div>
+      <div class="shot-notes">
+        <div><h5>Recuentos honestos</h5><p>Los tamaños son grillas reales y la matriz muestra el corte exacto antes de empezar.</p></div>
+        <div><h5>Pro con motivo</h5><p>Las resoluciones estaban en gris sin decir por qué. Ahora es un interruptor con su etiqueta al lado.</p></div>
+        <div><h5>Privacidad al principio</h5><p>«Publicize game» y «require account» suben desde el engranaje a una decisión de tres opciones.</p></div>
+      </div>
+    </div>
+
+    <!-- ---------- 4 PARTIDA ---------- -->
+    <div class="shot">
+      <div class="shot-cap"><h3>Partida</h3><p>Las tres interfaces sueltas se consolidan y las piezas dejan de rodear el marco.</p></div>
+      <div class="pane"><div class="app"><div class="play">
+
+        <div class="pad" style="top:18px;left:18px;padding:13px 16px">
+          <div class="row" style="gap:16px">
+            <span class="mx" data-cols="17" data-rows="13" data-pct="64" data-cell="4" data-gap="1"></span>
+            <div>
+              <div class="mono" style="font-size:15px">142 <span class="dim">/ 221</span></div>
+              <div class="mono tiny dim" style="margin-top:3px">18:42 · en pausa ⏸</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pad" style="top:18px;right:18px;padding:14px 16px;width:216px">
+          <div class="row" style="justify-content:space-between;margin-bottom:12px">
+            <span class="cap">Jugando</span><span class="mono tiny dim">3 / 10</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px">
+            <div class="row" style="gap:10px"><span class="pip"></span>Agustín<span class="grow"></span><span class="mono tiny dim">86</span></div>
+            <div class="row" style="gap:10px"><span class="pip" style="background:var(--brass)"></span>mara<span class="grow"></span><span class="mono tiny dim">41</span></div>
+            <div class="row" style="gap:10px"><span class="pip" style="background:var(--ink-3)"></span>anon 582573<span class="grow"></span><span class="mono tiny dim">15</span></div>
+          </div>
+          <p class="tiny dim" style="border-top:1px solid var(--rule-soft);margin-top:13px;padding-top:11px">mara cerró la esquina inferior</p>
+        </div>
+
+        <div style="position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);width:262px;height:346px;border:1px dashed rgba(232,238,232,.3);border-radius:6px;display:grid;place-items:center">
+          <span class="mono" style="font-size:12px;color:rgba(232,238,232,.55)">tablero</span>
+        </div>
+
+        <div class="shelf">
+          <span class="jig" data-piece></span><span class="jig" data-piece></span><span class="jig" data-piece></span><span class="jig" data-piece></span><span class="jig" data-piece></span>
+          <span class="jig" data-piece></span><span class="jig" data-piece></span><span class="jig" data-piece></span><span class="jig" data-piece></span><span class="jig" data-piece></span>
+          <span class="jig" data-piece></span><span class="jig" data-piece></span><span class="jig" data-piece></span><span class="jig" data-piece></span>
+          <span class="grow"></span>
+          <span class="mono" style="font-size:12px;color:rgba(232,238,232,.6);white-space:nowrap">79 sueltas</span>
+        </div>
+
+        <div class="dock">
+          <button>Ver la caja</button>
+          <button>Pilas</button>
+          <button>Barajar</button>
+          <span class="div"></span>
+          <button aria-label="Alejar">−</button><button aria-label="Acercar">＋</button>
+          <span class="div"></span>
+          <button>Chat</button><button>Invitar</button><button aria-label="Ajustes">⚙</button>
+        </div>
+
+      </div></div></div>
+      <div class="shot-notes">
+        <div><h5>Un muelle, no tres barras</h5><p>Progreso a la izquierda, jugadores a la derecha, herramientas abajo. Nada queda fuera de la ventana.</p></div>
+        <div><h5>Bandeja de piezas</h5><p>Las sueltas rodeaban el marco y competían con él. Bajan a una repisa con desplazamiento propio, y de ahí se apartan a pilas que arma el jugador.</p></div>
+        <div><h5>Ajustes ≠ jugadores</h5><p>El engranaje mezclaba las dos cosas. La tabla queda siempre visible; los ajustes, en su menú.</p></div>
+      </div>
+    </div>
+
+    <!-- ---------- 5 MIS PUZZLES ---------- -->
+    <div class="shot">
+      <div class="shot-cap"><h3>Mis puzzles</h3><p>Ocho pestañas vacías se convierten en cuatro filtros y una cabecera con datos desde el primer día.</p></div>
+      <div class="pane"><div class="app">
+
+        <div class="app-bar">
+          <div class="brand"><span data-mark="3" style="width:32px;height:32px;margin:0 -4px"></span>jigsaw</div>
+          <nav class="app-nav"><a href="#">Jugar</a><a href="#">Biblioteca</a><a href="#" class="on">Mis puzzles</a></nav>
+          <span class="grow"></span><span class="pro">PRO</span><span class="who">AM</span>
+        </div>
+
+        <div style="padding:26px 22px 30px">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:26px;margin-bottom:32px">
+            <div class="stat"><div class="k">Piezas colocadas</div><div class="v mono">18.402</div><div class="n">+412 esta semana</div></div>
+            <div class="stat"><div class="k">Puzzles terminados</div><div class="v mono">64</div><div class="n">+3 esta semana</div></div>
+            <div class="stat"><div class="k">Días seguidos</div><div class="v mono">7</div><div class="n">tu récord son 12</div></div>
+            <div class="stat"><div class="k">Mejor tiempo · 500 pz</div><div class="v mono">41:07</div><div class="n">top 8 % global</div></div>
+          </div>
+
+          <div class="row" style="gap:8px;margin-bottom:20px;flex-wrap:wrap">
+            <span class="tag tag--on">En curso <span class="tag--n">3</span></span>
+            <span class="tag">Terminados <span class="tag--n">64</span></span>
+            <span class="tag">Guardados <span class="tag--n">21</span></span>
+            <span class="tag">Míos <span class="tag--n">4</span></span>
+            <span class="grow"></span>
+            <span class="tag">Archivo</span>
+          </div>
+
+          <div class="list">
+            <div class="list-row">
+              <div class="img" style="width:70px;height:50px;border-radius:5px;flex:none"></div>
+              <div style="flex:1"><div style="font-size:14.5px;font-weight:600">Gatos en la ventana</div><div class="mono tiny dim" style="margin-top:3px">221 piezas · 2 jugadores</div></div>
+              <span class="mx" data-cols="14" data-rows="10" data-pct="64" data-cell="3.5" data-gap="1"></span>
+              <span class="mono tiny dim" style="width:52px;text-align:right">64 %</span>
+              <span class="mono tiny dim" style="width:92px;text-align:right">hace 2 h</span>
+              <button class="b b--sm">Reanudar</button>
+            </div>
+            <div class="list-row">
+              <div class="img" style="width:70px;height:50px;border-radius:5px;flex:none"></div>
+              <div style="flex:1"><div style="font-size:14.5px;font-weight:600">Cascada en el bosque</div><div class="mono tiny dim" style="margin-top:3px">500 piezas · en solitario</div></div>
+              <span class="mx" data-cols="14" data-rows="10" data-pct="22" data-cell="3.5" data-gap="1"></span>
+              <span class="mono tiny dim" style="width:52px;text-align:right">22 %</span>
+              <span class="mono tiny dim" style="width:92px;text-align:right">ayer</span>
+              <button class="b b--sm">Reanudar</button>
+            </div>
+            <div class="list-row">
+              <div class="img" style="width:70px;height:50px;border-radius:5px;flex:none"></div>
+              <div style="flex:1"><div style="font-size:14.5px;font-weight:600">Mapa de Europa</div><div class="mono tiny dim" style="margin-top:3px">864 piezas · 5 jugadores</div></div>
+              <span class="mx" data-cols="14" data-rows="10" data-pct="88" data-cell="3.5" data-gap="1"></span>
+              <span class="mono tiny dim" style="width:52px;text-align:right">88 %</span>
+              <span class="mono tiny dim" style="width:92px;text-align:right">hace 3 días</span>
+              <button class="b b--sm">Reanudar</button>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <div class="shot-notes">
+        <div><h5>Las estadísticas dejan de estar vacías</h5><p>Cuatro medidas suben a la cabecera. Racha y mejores tiempos dan contenido desde la primera partida.</p></div>
+        <div><h5>Lista, no cuadrícula</h5><p>Para retomar importan progreso, tiempo y con quién estabas. La cuadrícula se reserva a la Biblioteca.</p></div>
+        <div><h5>Cada fila lleva su mapa</h5><p>La matriz dice de un vistazo si te falta el centro o el cielo, cosa que un porcentaje solo no puede.</p></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ======================= MODELO TÁCTIL ======================= -->
+<section class="sec">
+  <div class="shell">
+    <div class="sec-head">
+      <p class="eyebrow">En la mano</p>
+      <div>
+        <h2>El teléfono no es el escritorio más chico</h2>
+        <p class="prose" style="margin-top:14px">En una pantalla de seis pulgadas el tablero no cabe, el dedo tapa exactamente la pieza que estás colocando y arrastrar compite con hacer zoom. Nada de eso se arregla reduciendo la interfaz de escritorio, así que el modelo de interacción se define primero y las pantallas salen de él.</p>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-obs"><b>Un dedo · dos dedos</b>El conflicto de siempre entre mover la pieza y mover el tablero.</div>
+      <div class="track-res">
+        <h3>Un dedo mueve la pieza, dos mueven la mesa</h3>
+        <p>Sin botón de modo y sin pulsación larga para desambiguar. Arrastrar con un dedo siempre toma la pieza que hay debajo; con dos siempre desplaza y acerca el tablero. <b>El gesto decide, no un estado.</b></p>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-obs"><b>Desplazamiento</b>El problema físico: el pulgar mide más que la pieza.</div>
+      <div class="track-res">
+        <h3>La pieza va por encima del dedo, no debajo</h3>
+        <p>Al levantarla se separa unos 44 px hacia arriba y crece un 15 %, con una marca tenue en el punto real donde va a caer. Sin esto no ves lo que estás colocando justo en el momento en que necesitas verlo.</p>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-obs"><b>Tocar · tocar</b>Alternativa al arrastre para quien busca precisión.</div>
+      <div class="track-res">
+        <h3>Tocar la toma, tocar la suelta</h3>
+        <p>La pieza queda fijada al puntero y el tablero sigue libre: podés acercarte, buscar el hueco y recién ahí soltarla. Es lo que hace posible armar puzzles de 500 piezas en un teléfono sin pelearse con el zoom.</p>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-obs"><b>Bandeja</b>Recorrer 500 piezas en una tira horizontal no es viable.</div>
+      <div class="track-res">
+        <h3>La bandeja no clasifica por vos</h3>
+        <p>Se abre arrastrando el asa y ocupa media pantalla, en cuatro columnas de unos 50 px — el mínimo para distinguir un fragmento de cielo de otro. Pero el orden lo ponés vos: <b>apartás piezas a pilas propias</b> arrastrándolas ahí, igual que en una mesa se hace un montón con lo que parece hierba y otro con lo que parece ventana. Clasificar es jugar.</p>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-obs"><b>El límite</b>Dónde termina la ayuda y empieza resolverle el puzzle al jugador.</div>
+      <div class="track-res">
+        <h3>El sistema nunca ordena las piezas</h3>
+        <p>Una función que ofreciera «mostrame las del cielo» estaría haciendo el reconocimiento, que es <b>exactamente el trabajo que el jugador vino a hacer</b>. Pero separar el marco tampoco se automatiza: mirar una pieza y ver que tiene un lado recto ya es leerla, y hacerlo con las quinientas es el ritual con el que empieza cualquier mesa. <b>No hay ninguna pila automática.</b> Ni por contenido, ni por forma. Todas las pilas las arma el jugador, con los nombres que se le ocurran — «verdes», «las raras» —, y el único trabajo del sistema es acordarse de ellas.</p>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-obs"><b>Barajar</b>El montón desordenado que se rehace al pasar la mano.</div>
+      <div class="track-res">
+        <h3>Lo único que el sistema hace con las piezas es revolverlas</h3>
+        <p>Si la bandeja conserva siempre el mismo orden, se termina memorizando posiciones en vez de mirando piezas. Barajar no revela nada y no acerca la solución ni un paso: solo devuelve el desorden, que es la condición de partida del juego.</p>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-obs"><b>Doble toque</b>Volver a ver el conjunto.</div>
+      <div class="track-res">
+        <h3>Doble toque encuadra</h3>
+        <p>Alterna entre el tablero completo y el último nivel de acercamiento. Es el gesto que evita perderse, y el único atajo que hace falta memorizar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= PANTALLAS MÓVIL ======================= -->
+<section class="table">
+  <div class="shell">
+    <div class="sec-head">
+      <p class="eyebrow">En el teléfono</p>
+      <div>
+        <h2 style="color:var(--felt-ink)">Seis pantallas y una vuelta a horizontal</h2>
+        <p class="prose">Cuatro pestañas abajo, al alcance del pulgar, con los mismos cuatro destinos que en escritorio. Durante la partida el sistema se invierte: la barra desaparece y manda el tablero.</p>
+      </div>
+    </div>
+
+    <!-- fila 1 -->
+    <div class="phones">
+
+      <!-- A · JUGAR -->
+      <div>
+        <div class="ph">
+          <div class="ph-st"><span>9:41</span><span>▮▮▮</span></div>
+          <div class="ph-top">
+            <span class="brand" style="font-size:15px"><span data-mark="3" style="width:29px;height:29px;margin:0 -4px"></span>jigsaw</span>
+            <span class="grow"></span><span class="pro">PRO</span>
+            <span class="who" style="width:27px;height:27px;font-size:10.5px">AM</span>
+          </div>
+          <div class="ph-body ph-pad">
+            <div class="tile" style="margin-bottom:14px">
+              <div class="img" style="height:100px"></div>
+              <div style="padding:14px 15px 15px">
+                <span class="cap">Continuar</span>
+                <h4 style="font-family:var(--display);font-size:20px;font-weight:600;letter-spacing:-.022em;margin:6px 0 12px">Gatos en la ventana</h4>
+                <div class="row" style="gap:12px;margin-bottom:14px">
+                  <span class="mx" data-cols="14" data-rows="10" data-pct="64" data-cell="4" data-gap="1"></span>
+                  <div class="mono tiny dim" style="line-height:1.6">142 / 221<br>18:42 · 2 jugadores</div>
+                </div>
+                <button class="b b--fill" style="width:100%;justify-content:center;height:42px">Reanudar</button>
+              </div>
+            </div>
+
+            <div class="tile" style="display:flex;align-items:center;gap:13px;padding:11px 13px;margin-bottom:20px">
+              <div class="img" style="width:52px;height:52px;border-radius:5px;flex:none"></div>
+              <div style="flex:1">
+                <span class="cap">Puzzle del día</span>
+                <div style="font-size:14.5px;font-weight:600;margin-top:3px">Mercado de Lisboa</div>
+                <div class="mono tiny dim" style="margin-top:2px">500 pz · 1.284 hoy</div>
+              </div>
+            </div>
+
+            <div class="row" style="gap:9px;margin-bottom:12px">
+              <span class="pip"></span>
+              <h4 style="font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:-.02em">Mesas abiertas</h4>
+              <span class="grow"></span><span class="mono tiny dim">37</span>
+            </div>
+            <div class="row" style="gap:7px;margin-bottom:13px">
+              <span class="tag tag--on">Con hueco</span><span class="tag">Menos de 300</span><span class="tag">Todas</span>
+            </div>
+            <div class="tile" style="display:flex;align-items:center;gap:13px;padding:11px 13px;margin-bottom:11px">
+              <div class="img" style="width:52px;height:52px;border-radius:5px;flex:none"></div>
+              <div style="flex:1"><div style="font-size:14px;font-weight:600">Carretes de hilo</div><div class="mono tiny dim" style="margin-top:2px">1024 pz · 8 / 10</div></div>
+              <span class="mx" data-cols="10" data-rows="7" data-pct="34" data-cell="3.5" data-gap="1"></span>
+            </div>
+            <div class="tile" style="display:flex;align-items:center;gap:13px;padding:11px 13px">
+              <div class="img" style="width:52px;height:52px;border-radius:5px;flex:none"></div>
+              <div style="flex:1"><div style="font-size:14px;font-weight:600">Cintas de colores</div><div class="mono tiny dim" style="margin-top:2px">1014 pz · 1 / 10</div></div>
+              <span class="mx" data-cols="10" data-rows="7" data-pct="78" data-cell="3.5" data-gap="1"></span>
+            </div>
+          </div>
+          <nav class="ph-tabs">
+            <span class="ph-tab ph-tab--on">Jugar</span><span class="ph-tab">Biblioteca</span>
+            <span class="ph-tab">Mis puzzles</span><span class="ph-tab">Cuenta</span>
+          </nav>
+          <span class="ph-home"></span>
+        </div>
+        <p class="ph-cap">Jugar. El regreso ocupa la primera pantalla completa; las mesas pasan de rejilla a filas porque en 360 px una miniatura de cuatro columnas no informa de nada.</p>
+      </div>
+
+      <!-- B · BIBLIOTECA -->
+      <div>
+        <div class="ph">
+          <div class="ph-st"><span>9:41</span><span>▮▮▮</span></div>
+          <div class="ph-top">
+            <span class="brand" style="font-size:15px"><span data-mark="3" style="width:29px;height:29px;margin:0 -4px"></span>jigsaw</span>
+            <span class="grow"></span>
+            <span class="who" style="width:27px;height:27px;font-size:10.5px">AM</span>
+          </div>
+          <div class="ph-body ph-pad">
+            <div style="border:1px solid var(--ink);border-radius:6px;padding:11px 14px;margin-bottom:12px">
+              <div style="font-size:15px">gato durmiendo junto a una ventana</div>
+              <div class="row" style="gap:7px;margin-top:7px">
+                <span class="pip"></span><span class="mono tiny" style="color:var(--felt)">40 coincidencias fuertes</span>
+              </div>
+            </div>
+            <div class="row" style="gap:7px;margin-bottom:14px">
+              <span class="tag tag--on">Todo</span><span class="tag">Animales</span><span class="tag">Paisajes</span><span class="tag">Ar…</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:104px;gap:11px">
+              <div class="tile" style="grid-row:span 2"><div class="img" style="height:100%"><span class="stamp">4K</span></div></div>
+              <div class="tile"><div class="img" style="height:100%"></div></div>
+              <div class="tile"><div class="img" style="height:100%"></div></div>
+              <div class="tile" style="grid-column:span 2">
+                <div class="img" style="height:100%;display:flex;align-items:flex-end;padding:11px">
+                  <div style="position:relative;z-index:1;background:var(--paper);border:1px solid var(--rule);border-radius:5px;padding:6px 10px">
+                    <div style="font-size:13px;font-weight:600">Gatos en la ventana</div>
+                    <div class="mono tiny dim" style="margin-top:1px">3,1 ★ · vertical</div>
+                  </div>
+                </div>
+              </div>
+              <div class="tile"><div class="img" style="height:100%"></div></div>
+              <div class="tile" style="grid-row:span 2"><div class="img" style="height:100%"></div></div>
+              <div class="tile"><div class="img" style="height:100%"></div></div>
+            </div>
+          </div>
+          <nav class="ph-tabs">
+            <span class="ph-tab">Jugar</span><span class="ph-tab ph-tab--on">Biblioteca</span>
+            <span class="ph-tab">Mis puzzles</span><span class="ph-tab">Cuenta</span>
+          </nav>
+          <span class="ph-home"></span>
+        </div>
+        <p class="ph-cap">Biblioteca. El campo de búsqueda absorbe el aviso de calidad para no gastar una franja entera, y la rejilla baja a dos columnas manteniendo el formato de cada imagen.</p>
+      </div>
+
+      <!-- C · PREPARAR -->
+      <div>
+        <div class="ph">
+          <div class="ph-st"><span>9:41</span><span>▮▮▮</span></div>
+          <div class="ph-body">
+            <div class="img" style="position:absolute;inset:0"></div>
+            <button class="b b--sm" style="position:absolute;top:10px;left:16px;background:var(--paper)">← Biblioteca</button>
+            <div class="ph-sheet">
+              <div class="ph-grip"></div>
+              <h4 style="font-family:var(--display);font-size:21px;font-weight:600;letter-spacing:-.022em">Gatos en la ventana</h4>
+              <p class="mono tiny dim" style="margin:3px 0 16px">vertical · 2048 × 2731 · 3,1 ★</p>
+
+              <div class="row" style="justify-content:space-between;margin-bottom:10px">
+                <span class="cap">Cuántas piezas</span><span class="mono tiny dim">unos 35 min</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:13px">
+                <span class="tag" style="justify-content:center">54</span><span class="tag" style="justify-content:center">120</span>
+                <span class="tag tag--on" style="justify-content:center">221</span><span class="tag" style="justify-content:center">500</span>
+              </div>
+              <div class="row" style="gap:12px;margin-bottom:18px">
+                <span class="mx" data-cols="17" data-rows="13" data-pct="0" data-cell="4" data-gap="1"></span>
+                <p class="tiny dim" style="line-height:1.45">17 × 13 exactas.<br>El número que elegís es el que obtenés.</p>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:13px;margin-bottom:18px">
+                <div class="opt"><span>Ver la caja durante la partida</span><span class="sw sw--on"></span></div>
+                <div class="opt"><span>Resolución alta <span class="pro" style="margin-left:4px">PRO</span></span><span class="sw sw--on"></span></div>
+              </div>
+
+              <span class="cap" style="display:block;margin-bottom:10px">Quién puede entrar</span>
+              <div class="row" style="gap:7px;margin-bottom:18px">
+                <span class="tag tag--on">Solo yo</span><span class="tag">Con enlace</span><span class="tag">Cualquiera</span>
+              </div>
+
+              <button class="b b--fill" style="width:100%;justify-content:center;height:48px">Empezar · 221 piezas</button>
+            </div>
+          </div>
+          <span class="ph-home"></span>
+        </div>
+        <p class="ph-cap">Preparar la mesa. Hoja inferior sobre la imagen: se arrastra hacia abajo para ver la foto entera y hacia arriba para seguir ajustando. La barra de pestañas se retira.</p>
+      </div>
+    </div>
+
+    <!-- fila 2 -->
+    <div class="phones">
+
+      <!-- D · PARTIDA, BANDEJA CERRADA -->
+      <div>
+        <div class="ph ph--felt">
+          <div class="ph-st"><span>9:41</span><span>▮▮▮</span></div>
+          <div class="ph-body">
+            <div class="ph-bar">
+              <span class="mx" data-cols="17" data-rows="13" data-pct="64" data-cell="3" data-gap="0.5"></span>
+              <div>
+                <div class="mono" style="font-size:14px">142 <span class="dim">/ 221</span></div>
+                <div class="mono tiny dim" style="margin-top:2px">18:42</div>
+              </div>
+              <span class="grow"></span>
+              <span class="row" style="gap:5px">
+                <span class="pip"></span><span class="pip" style="background:var(--brass)"></span>
+                <span class="mono tiny dim" style="margin-left:3px">2</span>
+              </span>
+              <button class="b b--sm b--ic">⋯</button>
+            </div>
+
+            <div style="position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);width:230px;height:300px;border:1px dashed rgba(232,238,232,.3);border-radius:6px;display:grid;place-items:start center;padding-top:10px">
+              <span class="mono" style="font-size:11px;color:rgba(232,238,232,.5)">tablero</span>
+            </div>
+
+            <span data-ghost="4" style="position:absolute;left:89px;top:calc(38% + 92px);width:78px;height:78px"></span>
+            <span data-piece style="position:absolute;left:85px;top:calc(38% + 36px);width:88px;height:88px;filter:drop-shadow(0 10px 16px rgba(0,0,0,.45))"></span>
+            <div style="position:absolute;left:124px;top:calc(38% + 127px);width:9px;height:9px;border-radius:50%;background:rgba(232,238,232,.6)"></div>
+            <div style="position:absolute;left:180px;top:calc(38% + 70px);font-family:var(--mono);font-size:10px;color:rgba(232,238,232,.5);line-height:1.5">la pieza,<br>44 px arriba<br>del dedo</div>
+
+            <div class="ph-tray">
+              <div class="ph-grip"></div>
+              <div class="row" style="gap:7px;margin-bottom:11px">
+                <span class="tag tag--on">Pilas</span><span class="tag">Ver la caja</span><span class="tag">Chat</span>
+                <span class="grow"></span><span class="mono tiny dim">79</span>
+              </div>
+              <div class="ph-jigs">
+                <span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span>
+                <span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span>
+              </div>
+            </div>
+          </div>
+          <span class="ph-home"></span>
+        </div>
+        <p class="ph-cap">Partida. La pieza levantada flota 44 px sobre el dedo y marca con un contorno dónde va a caer. La bandeja cerrada deja una fila visible y el tablero se queda con el resto.</p>
+      </div>
+
+      <!-- E · BANDEJA ABIERTA -->
+      <div>
+        <div class="ph ph--felt">
+          <div class="ph-st"><span>9:41</span><span>▮▮▮</span></div>
+          <div class="ph-body">
+            <div class="ph-bar">
+              <span class="mx" data-cols="17" data-rows="13" data-pct="64" data-cell="3" data-gap="0.5"></span>
+              <div>
+                <div class="mono" style="font-size:14px">142 <span class="dim">/ 221</span></div>
+                <div class="mono tiny dim" style="margin-top:2px">18:42</div>
+              </div>
+              <span class="grow"></span>
+              <button class="b b--sm b--ic">⋯</button>
+            </div>
+
+            <div style="position:absolute;left:50%;top:118px;transform:translateX(-50%);width:172px;height:224px;border:1px dashed rgba(232,238,232,.3);border-radius:6px"></div>
+
+            <div class="ph-tray" style="height:388px">
+              <div class="ph-grip"></div>
+              <div class="row" style="gap:7px;margin-bottom:13px;flex-wrap:wrap">
+                <span class="tag tag--on">Todas <span class="tag--n">79</span></span>
+                <span class="tag">Verdes <span class="tag--n">12</span></span>
+                <span class="tag">Las raras <span class="tag--n">7</span></span>
+                <span class="tag">＋ pila</span>
+                <span class="tag">Barajar</span>
+              </div>
+              <div class="ph-grid">
+                <span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span>
+                <span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span>
+                <span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span>
+                <span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span><span class="ph-jig" data-piece></span>
+              </div>
+              <p class="tiny dim" style="margin-top:12px">Tocá una pieza para fijarla al puntero. El tablero sigue libre mientras la llevás.</p>
+            </div>
+          </div>
+          <span class="ph-home"></span>
+        </div>
+        <p class="ph-cap">Bandeja abierta. «Verdes» y «Las raras» las armó el jugador arrastrando piezas ahí, y les puso esos nombres. No hay ninguna pila automática: ni por contenido, ni por forma, ni siquiera la de los bordes.</p>
+      </div>
+
+      <!-- F · MIS PUZZLES -->
+      <div>
+        <div class="ph">
+          <div class="ph-st"><span>9:41</span><span>▮▮▮</span></div>
+          <div class="ph-top">
+            <span class="brand" style="font-size:15px"><span data-mark="3" style="width:29px;height:29px;margin:0 -4px"></span>jigsaw</span>
+            <span class="grow"></span>
+            <span class="who" style="width:27px;height:27px;font-size:10.5px">AM</span>
+          </div>
+          <div class="ph-body ph-pad">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px 20px;margin-bottom:22px">
+              <div class="stat"><div class="k">Piezas colocadas</div><div class="v mono" style="font-size:25px">18.402</div><div class="n">+412 esta semana</div></div>
+              <div class="stat"><div class="k">Terminados</div><div class="v mono" style="font-size:25px">64</div><div class="n">+3 esta semana</div></div>
+              <div class="stat"><div class="k">Días seguidos</div><div class="v mono" style="font-size:25px">7</div><div class="n">tu récord son 12</div></div>
+              <div class="stat"><div class="k">Mejor · 500 pz</div><div class="v mono" style="font-size:25px">41:07</div><div class="n">top 8 % global</div></div>
+            </div>
+
+            <div class="row" style="gap:7px;margin-bottom:14px">
+              <span class="tag tag--on">En curso <span class="tag--n">3</span></span>
+              <span class="tag">Terminados <span class="tag--n">64</span></span>
+              <span class="tag">Guar…</span>
+            </div>
+
+            <div class="list">
+              <div class="list-row" style="gap:12px;padding:12px 2px">
+                <div class="img" style="width:56px;height:42px;border-radius:5px;flex:none"></div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14px;font-weight:600">Gatos en la ventana</div>
+                  <div class="mono tiny dim" style="margin-top:2px">64 % · hace 2 h</div>
+                </div>
+                <span class="mx" data-cols="12" data-rows="9" data-pct="64" data-cell="3" data-gap="1"></span>
+              </div>
+              <div class="list-row" style="gap:12px;padding:12px 2px">
+                <div class="img" style="width:56px;height:42px;border-radius:5px;flex:none"></div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14px;font-weight:600">Cascada en el bosque</div>
+                  <div class="mono tiny dim" style="margin-top:2px">22 % · ayer</div>
+                </div>
+                <span class="mx" data-cols="12" data-rows="9" data-pct="22" data-cell="3" data-gap="1"></span>
+              </div>
+              <div class="list-row" style="gap:12px;padding:12px 2px">
+                <div class="img" style="width:56px;height:42px;border-radius:5px;flex:none"></div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14px;font-weight:600">Mapa de Europa</div>
+                  <div class="mono tiny dim" style="margin-top:2px">88 % · hace 3 días</div>
+                </div>
+                <span class="mx" data-cols="12" data-rows="9" data-pct="88" data-cell="3" data-gap="1"></span>
+              </div>
+            </div>
+          </div>
+          <nav class="ph-tabs">
+            <span class="ph-tab">Jugar</span><span class="ph-tab">Biblioteca</span>
+            <span class="ph-tab ph-tab--on">Mis puzzles</span><span class="ph-tab">Cuenta</span>
+          </nav>
+          <span class="ph-home"></span>
+        </div>
+        <p class="ph-cap">Mis puzzles. Las cuatro medidas caben en dos columnas y la fila deja de mostrar botón: la fila entera reanuda, que es lo único que se hace ahí.</p>
+      </div>
+    </div>
+
+    <!-- horizontal -->
+    <div style="margin-top:52px">
+      <div class="shot-cap" style="margin-bottom:18px">
+        <h3>Al girar el teléfono</h3>
+        <p>La bandeja pasa de abajo a la derecha y el tablero recupera altura, que es la dimensión escasa en horizontal. Es la orientación buena para los puzzles apaisados.</p>
+      </div>
+      <div class="land">
+        <div style="flex:1;position:relative">
+          <div class="pad" style="top:14px;left:14px;padding:9px 13px">
+            <div class="row" style="gap:11px">
+              <span class="mx" data-cols="17" data-rows="13" data-pct="64" data-cell="2.5" data-gap="0.5"></span>
+              <div>
+                <div class="mono" style="font-size:13px">142 <span class="dim">/ 221</span></div>
+                <div class="mono tiny dim" style="margin-top:1px">18:42</div>
+              </div>
+            </div>
+          </div>
+          <div style="position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:196px;height:236px;border:1px dashed rgba(232,238,232,.3);border-radius:6px;display:grid;place-items:center">
+            <span class="mono" style="font-size:11px;color:rgba(232,238,232,.5)">tablero</span>
+          </div>
+          <div class="dock" style="bottom:14px;padding:4px">
+            <button>Ver la caja</button><span class="div"></span>
+            <button>Pilas</button><span class="div"></span><button>Chat</button>
+          </div>
+        </div>
+        <div class="land-tray">
+          <div class="row" style="justify-content:space-between">
+            <span class="cap">Verdes</span><span class="mono tiny dim">12</span>
+          </div>
+          <div class="land-grid">
+            <span data-piece></span><span data-piece></span>
+            <span data-piece></span><span data-piece></span>
+            <span data-piece></span><span data-piece></span>
+            <span data-piece></span><span data-piece></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shot-notes" style="margin-top:34px">
+      <div><h5>Pulgar primero</h5><p>Reanudar, la bandeja y las pestañas viven en el tercio inferior. Lo de arriba es solo para leer.</p></div>
+      <div><h5>Sin hover, sin menús ocultos</h5><p>Todo lo que en escritorio aparece al pasar el cursor está siempre visible o detrás de un único ⋯.</p></div>
+      <div><h5>Zonas de toque de 44 px</h5><p>Ninguna acción cae por debajo de ese tamaño, incluidas las pastillas de pila y el asa de la bandeja.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= QUÉ AÑADIRÍA ======================= -->
+<section class="sec" style="border-top:0">
+  <div class="shell">
+    <div class="sec-head">
+      <p class="eyebrow">Qué añadiría</p>
+      <div>
+        <h2>Seis funciones que el producto ya casi tiene</h2>
+        <p class="prose" style="margin-top:14px">Ninguna pide infraestructura nueva: todas se apoyan en datos que el sitio ya calcula o en el catálogo que ya está curado.</p>
+      </div>
+    </div>
+    <div class="adds">
+      <div class="add"><h4>Puzzle del día</h4><p>Con tabla de tiempos. Da un motivo para volver que hoy no existe.</p></div>
+      <div class="add"><h4>Duración estimada</h4><p>Por tamaño. El dato ya está en agregado: el contador de la portada marca 1.231 millones de piezas colocadas.</p></div>
+      <div class="add"><h4>Pilas propias</h4><p>Apartar piezas en montones que nombra el jugador. Es lo que hace manejables los formatos de más de mil sin decirle a nadie dónde va nada.</p></div>
+      <div class="add"><h4>Armar sin la caja</h4><p>Quitar la imagen de referencia durante la partida. El modo difícil de verdad, y el único que puede presumirse en un récord.</p></div>
+      <div class="add"><h4>Racha y récords</h4><p>Por tamaño, con percentil. Convierte la pestaña de estadísticas en algo que vale la pena abrir.</p></div>
+      <div class="add"><h4>Quién hizo qué</h4><p>«mara cerró la esquina inferior». Hoy el multijugador es mudo salvo por el chat.</p></div>
+    </div>
+    <p class="colofon">Maqueta no funcional: estructura, materiales y tipografía, sin lógica de aplicación.<br>Bricolage Grotesque · IBM Plex Sans · IBM Plex Mono.</p>
+  </div>
+</section>
+
+<script>
+(function(){
+  function build(el){
+    var cols=+el.dataset.cols, rows=+el.dataset.rows, pct=+el.dataset.pct;
+    var cell=parseFloat(el.dataset.cell), gap=parseFloat(el.dataset.gap);
+    el.style.gridTemplateColumns='repeat('+cols+','+cell+'px)';
+    el.style.gridAutoRows=cell+'px';
+    el.style.gap=gap+'px';
+    el.style.width=(cols*cell+(cols-1)*gap)+'px';
+    el.style.height=(rows*cell+(rows-1)*gap)+'px';
+
+    var cells=[];
+    for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){
+      cells.push({i:r*cols+c, ring:Math.min(r,c,rows-1-r,cols-1-c)});
+    }
+    var order=cells.slice().sort(function(a,b){return a.ring-b.ring||a.i-b.i});
+    var n=Math.round(cells.length*pct/100);
+    var rank={};
+    order.forEach(function(o,k){rank[o.i]=k});
+
+    var frag=document.createDocumentFragment();
+    var stagger=+el.dataset.stagger||0;
+    for(var k=0;k<cells.length;k++){
+      var i=document.createElement('i');
+      if(rank[k]<n) i.className='on';
+      if(stagger) i.style.transitionDelay=(rank[k]*stagger)+'ms';
+      frag.appendChild(i);
+    }
+    el.appendChild(frag);
+  }
+
+  var all=document.querySelectorAll('.mx');
+  for(var j=0;j<all.length;j++) build(all[j]);
+
+  /* ---- geometría de la pieza ----
+     Tres cúbicas de Bézier por lado, con los puntos de control del
+     generador de Manuel Kasten (github.com/Draradech/jigsaw), que es la
+     referencia que usan los generadores de troquel para corte láser.
+     t = tamaño de lengüeta (22 % del lado); a..e = variación por pieza.
+     Los puntos de control a −t cruzan al otro lado de la línea: eso es
+     lo que estrangula el cuello y hace que la lengüeta agarre. */
+  var TAB=0.11, JIT=0.045;
+  var SIDES=[
+    {o:[0,0],d:[1,0],n:[0,-1]},
+    {o:[1,0],d:[0,1],n:[1,0]},
+    {o:[1,1],d:[-1,0],n:[0,1]},
+    {o:[0,1],d:[0,-1],n:[-1,0]}
+  ];
+  var TONES=['#D6D1C2','#C7C3B0','#BEC5B2','#CDBFA6','#B9C0BC','#D1C7B3','#C3BBA5','#C9CAB8'];
+
+  function rng(seed){
+    var s=seed*2654435761%4294967296;
+    return function(){ s=(s*1664525+1013904223)%4294967296; return s/4294967296 };
+  }
+  function path(r,S){
+    var d='',s,side,flip,t=TAB,ja,jb,jc,jd,je,segs,i,k,al,ac,pts;
+    function jit(){ return (r()*2-1)*JIT }
+    function pt(al,ac){
+      var x=(side.o[0]+side.d[0]*al+side.n[0]*ac*flip)*S;
+      var y=(side.o[1]+side.d[1]*al+side.n[1]*ac*flip)*S;
+      return (Math.round(x*100)/100)+' '+(Math.round(y*100)/100);
+    }
+    for(s=0;s<4;s++){
+      side=SIDES[s];
+      flip = r()<0.5 ? 1 : -1;
+      if(s===0) d='M '+pt(0,0);
+      ja=jit(); jb=jit(); jc=jit(); jd=jit(); je=jit();
+      segs=[
+        [0.2, ja,                0.5+jb+jd, -t+jc,      0.5-t+jb, t+jc],
+        [0.5-2*t+jb-jd, 3*t+jc,  0.5+2*t+jb-jd, 3*t+jc,  0.5+t+jb, t+jc],
+        [0.5+jb+jd, -t+jc,       0.8, je,                1, 0]
+      ];
+      for(i=0;i<3;i++){
+        pts=[];
+        for(k=0;k<6;k+=2) pts.push(pt(segs[i][k],segs[i][k+1]));
+        d+=' C '+pts.join(' ');
+      }
+    }
+    return d+' Z';
+  }
+  function svg(seed,paint){
+    var r=rng(seed+11);
+    var pad=36, box=100+pad*2;
+    return '<svg viewBox="'+(-pad)+' '+(-pad)+' '+box+' '+box+'" aria-hidden="true">'+
+           '<path d="'+path(r,100)+'" '+paint(r)+'/></svg>';
+  }
+
+  var pieces=document.querySelectorAll('[data-piece]');
+  for(var a=0;a<pieces.length;a++){
+    (function(el,i){
+      el.innerHTML=svg(i+1,function(r){
+        return 'fill="'+TONES[Math.floor(r()*TONES.length)]+'"';
+      });
+    })(pieces[a],a);
+  }
+  var ghosts=document.querySelectorAll('[data-ghost]');
+  for(var g=0;g<ghosts.length;g++){
+    ghosts[g].innerHTML=svg(+ghosts[g].dataset.ghost,function(){
+      return 'fill="none" stroke="rgba(232,238,232,.55)" stroke-width="3" stroke-dasharray="7 6"';
+    });
+  }
+  var marks=document.querySelectorAll('[data-mark]');
+  for(var m=0;m<marks.length;m++){
+    marks[m].innerHTML=svg(+marks[m].dataset.mark,function(){return 'fill="#2E4A3C"'});
+  }
+
+  var hero=document.querySelector('.mx.anim');
+  if(hero) requestAnimationFrame(function(){requestAnimationFrame(function(){hero.classList.add('go')})});
+})();
+</script>
+</body>
+</html>
