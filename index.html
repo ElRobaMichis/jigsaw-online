@@ -519,8 +519,9 @@ function privUI(){
 $('setup-back').onclick=function(){show('scr-home')};
 $('start-btn').onclick=function(){
   var g=gridFor(SETUP.img,SETUP.count);
-  startGame({src:SETUP.src,cols:g.cols,rows:g.rows,seed:Math.floor(Math.random()*1e9),box:SETUP.box,rot:SETUP.rot,priv:SETUP.priv,elapsed:0,state:null});
-  if(SETUP.priv!=='solo')hostRoom();
+  var seed=Math.floor(Math.random()*1e9);
+  startGame({src:SETUP.src,cols:g.cols,rows:g.rows,seed:seed,box:SETUP.box,rot:SETUP.rot,priv:SETUP.priv,elapsed:0,state:null});
+  if(SETUP.priv!=='solo')hostRoom(seed);
 };
 
 /* ---------- núcleo del juego ---------- */
@@ -986,7 +987,7 @@ function miniMatrix(cols,rows,groups){
 }
 function resumeSave(id,sv){
   startGame({src:sv.cfg.src,cols:sv.cfg.cols,rows:sv.cfg.rows,seed:sv.cfg.seed,box:sv.cfg.box,rot:sv.cfg.rot,priv:sv.cfg.priv,elapsed:sv.state.elapsed,state:sv.state});
-  if(sv.cfg.priv!=='solo')hostRoom();
+  if(sv.cfg.priv!=='solo')hostRoom(sv.cfg.seed);
 }
 
 /* ---------- mesas conocidas ---------- */
@@ -1145,11 +1146,12 @@ function renderMis(f){
 document.querySelectorAll('[data-pf]').forEach(function(b){b.onclick=function(){renderMis(b.dataset.pf)}});
 
 /* ---------- red ---------- */
-function hostRoom(){
+function hostRoom(seed){
   if(NET.peer)return;
   NET.isHost=true;
   /* sala derivada de la partida: el mismo enlace sigue sirviendo si recargás */
-  NET.room=G?('jz-'+G.cfg.seed.toString(36)+'p'):('jz-'+shortId());
+  seed=seed||(G&&G.cfg.seed);
+  NET.room=seed?('jz-'+seed.toString(36)+'p'):('jz-'+shortId());
   try{NET.peer=new Peer(NET.room,{debug:0})}catch(e){toast('Sin conexión: se juega igual en solitario');return}
   NET.peer.on('open',function(){mesaMine()});
   NET.peer.on('error',function(err){
