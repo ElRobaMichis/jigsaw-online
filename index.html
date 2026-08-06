@@ -946,7 +946,11 @@ $('copy-link').onclick=function(){
   (navigator.clipboard?navigator.clipboard.writeText(ta.value):Promise.reject()).then(
     function(){toast('Enlace copiado')},
     function(){document.execCommand('copy');toast('Enlace copiado')})};
-$('d-exit').onclick=function(){if(confirm('¿Salir de la mesa? La partida queda guardada en este dispositivo.')){location.hash='';location.reload()}};
+function netDown(){try{if(NET.peer)NET.peer.destroy()}catch(e){}NET.peer=null;NET.conns=[];NET.room=null}
+addEventListener('pagehide',netDown);
+$('d-exit').onclick=function(){if(confirm('¿Salir de la mesa? La partida queda guardada en este dispositivo.')){
+  if(G&&!G.done)doSave();
+  netDown();location.hash='';location.reload()}};
 
 /* ---------- guardado local (varias partidas) ---------- */
 function savesMap(){try{return JSON.parse(localStorage.getItem('jz-saves'))||{}}catch(e){return {}}}
@@ -991,9 +995,16 @@ function resumeSave(id,sv){
 }
 
 /* ---------- mesas conocidas ---------- */
-function mesaAll(){return store('jz-mesas')}
+function mesaAll(){
+  /* una entrada por partida: si una mesa cambió de sala, queda solo la más nueva */
+  var all=store('jz-mesas'),seen={},out=[];
+  all.forEach(function(x){var k=x.saveId||x.room;if(seen[k])return;seen[k]=1;out.push(x)});
+  if(out.length!==all.length)storeW('jz-mesas',out);
+  return out;
+}
 function mesaUpsert(m){
-  var all=mesaAll(),i=all.findIndex(function(x){return x.room===m.room});
+  var all=mesaAll(),i=all.findIndex(function(x){
+    return x.room===m.room||(m.saveId&&x.saveId===m.saveId)});
   if(i>=0)all[i]=Object.assign(all[i],m);else all.unshift(m);
   all.sort(function(a,b){return b.ts-a.ts});while(all.length>12)all.pop();
   storeW('jz-mesas',all);
