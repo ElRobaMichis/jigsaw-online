@@ -12,7 +12,6 @@ Rompecabezas online sin servidor, sin cuentas y sin configuración: quien arma l
 - **Imágenes.** Libres de derechos desde [Lorem Picsum](https://picsum.photos), o una imagen propia — que viaja solo por el canal directo entre los dos dispositivos, sin subirse a ningún servidor.
 - **Gestos en el teléfono.** Un dedo mueve la pieza (con la pieza elevada sobre el dedo), dos dedos mueven y acercan la mesa, doble toque encuadra.
 - **Piezas giradas (opcional).** Doble toque sobre una pieza la gira 90°; solo encajan con la orientación correcta.
-- **Pilas propias.** «＋ pila» pone sobre la mesa un área con el nombre que elijas y se arrastra por su rótulo. El sistema nunca clasifica piezas: solo recuerda las pilas que arma cada quien.
 - **Chat y actividad.** Chat en la mesa con aviso de no leídos, y un feed que cuenta quién entró y quién encajó qué.
 - **Pausa.** Tocar el contador de progreso pausa el tiempo para ambos.
 - **Puzzle del día.** La misma imagen para todo el mundo, cada día, derivada de la fecha.
