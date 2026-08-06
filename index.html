@@ -289,6 +289,10 @@ button{font-family:inherit;cursor:pointer}
   </div>
   <div class="hud" id="hud-players"></div>
   <div class="hud" id="chat" style="display:none;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 74px);width:min(280px,calc(100vw - 24px));padding:10px 12px">
+    <div class="row" style="justify-content:space-between;margin-bottom:7px">
+      <span class="cap">Chat de la mesa</span>
+      <button id="chat-x" aria-label="Cerrar chat" style="border:0;background:transparent;font-size:16px;line-height:1;color:var(--ink3);padding:4px 6px;cursor:pointer">✕</button>
+    </div>
     <div id="chat-log" style="max-height:180px;overflow:auto;display:flex;flex-direction:column;gap:5px;font-size:13px;margin-bottom:9px"></div>
     <form id="chat-form" class="row" style="gap:6px">
       <input id="chat-in" maxlength="200" placeholder="Escribí…" style="flex:1;min-width:0;height:32px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);padding:0 10px;font:400 13px var(--sans);color:var(--ink)">
@@ -324,10 +328,14 @@ button{font-family:inherit;cursor:pointer}
 <div class="veil" id="m-preview"><div class="modal" style="max-width:none;width:auto"><img id="preview-img" alt="Imagen de la caja"><div class="row" style="margin-top:14px"><span class="grow"></span><button class="b" id="close-preview">Cerrar</button></div></div></div>
 <div class="veil" id="m-done">
   <div class="modal" style="text-align:center">
-    <h3 id="done-title">Terminado</h3>
-    <p id="done-meta"></p>
-    <div class="row" style="margin-top:16px;justify-content:center;gap:8px">
-      <button class="b b--fill" id="done-again">Otra imagen</button>
+    <p class="cap" style="margin-bottom:10px">Puzzle terminado</p>
+    <h3 id="done-title" style="font-size:26px">¡Terminado!</h3>
+    <div class="mono" style="font-size:15px;margin:6px 0 2px" id="done-meta"></div>
+    <div class="tiny dim" id="done-players" style="margin-bottom:4px"></div>
+    <div class="mono tiny dim" id="done-date"></div>
+    <div class="row" style="margin-top:20px;justify-content:center;gap:8px">
+      <button class="b b--fill" id="done-close">Cerrar y ver la mesa</button>
+      <button class="b" id="done-again">Otra imagen</button>
     </div>
   </div>
 </div>
@@ -349,6 +357,7 @@ button{font-family:inherit;cursor:pointer}
   <div class="modal" style="text-align:center">
     <h3>Entrando a la mesa…</h3>
     <p id="join-status">Conectando con quien te invitó.</p>
+    <button class="b" id="join-home" style="margin-top:16px">Volver al inicio</button>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -682,13 +691,17 @@ function win(){
   while(h.length>30)h.pop();storeW('jz-hechos',h);
   if(NET.room)mesaRemove(NET.room);
   var best=stats().best[total];
-  $('done-title').textContent='¡Terminado!';
-  $('done-meta').textContent=total+' piezas en '+fmtT(G.elapsed)+(best<G.elapsed?' · su récord en este tamaño: '+fmtT(best):' · récord nuevo en este tamaño')+'.';
+  $('done-title').textContent=srcTitle(G.cfg.src);
+  $('done-meta').textContent=total+' piezas · '+fmtT(G.elapsed)+(best<G.elapsed?' · récord: '+fmtT(best):' · récord nuevo');
+  var names=[ME.name];for(var pid in NET.players)names.push(NET.players[pid].name);
+  $('done-players').textContent=names.length>1?('Lo armaron '+names.join(' y ')):('Lo armó '+names[0]);
+  $('done-date').textContent=new Date().toLocaleDateString('es',{day:'numeric',month:'long',year:'numeric'});
   $('m-done').classList.add('on');
   feedEv('Puzzle terminado en '+fmtT(G.elapsed));
   clearSave();
 }
-$('done-again').onclick=function(){location.hash='';location.reload()};
+$('done-close').onclick=function(){$('m-done').classList.remove('on')};
+$('done-again').onclick=function(){netDown();location.hash='';location.reload()};
 
 /* ---------- interacción ---------- */
 var PTR={};      /* pointers activos */
@@ -703,7 +716,7 @@ board.addEventListener('pointerdown',function(e){
   if(n>2)return;
   var w=s2w(e.clientX,e.clientY);
   var hit=hitTest(w[0],w[1]);
-  if(hit&&!G.lock[gid(hit)]){
+  if(hit&&!lockActive(gid(hit))){
     var lift=(e.pointerType==='touch')?60/G.cam.s:0;
     DRAG={g:hit,offX:hit.x-w[0],offY:hit.y-w[1],lift:lift,moved:false};
     /* subir a tope */
@@ -788,6 +801,9 @@ function pinchMove(){var k=Object.keys(PTR),a=PTR[k[0]],b=PTR[k[1]];if(!pinch0)r
 function zoomAt(sx,sy,f){var w=s2w(sx,sy);
   G.cam.s=Math.max(0.05,Math.min(4,G.cam.s*f));
   G.cam.x=w[0]-sx/G.cam.s;G.cam.y=w[1]-sy/G.cam.s;G.dirty=true}
+/* un bloqueo remoto caduca solo: si se pierde el «soltar» del otro lado,
+   la pieza no queda inagarrable para siempre */
+function lockActive(id){var t=G.lock[id];return t&&Date.now()-t<4200}
 function hitTest(wx,wy){
   for(var gi=G.groups.length-1;gi>=0;gi--){
     var g=G.groups[gi],rot=g.rot||0;
@@ -879,9 +895,16 @@ function applyFullState(st){
 /* ---------- chat y actividad ---------- */
 var CHATN=0;
 function chatOpen(){return $('chat').style.display!=='none'}
+function chatClose(){$('chat-in').blur();$('chat').style.display='none'}
+$('chat-x').onclick=chatClose;
 $('d-chat').onclick=function(){
-  $('chat').style.display=chatOpen()?'none':'';
-  if(chatOpen()){CHATN=0;$('chat-n').style.display='none';$('chat-in').focus()}};
+  if(chatOpen()){chatClose();return}
+  $('chat').style.display='';
+  CHATN=0;$('chat-n').style.display='none';
+  /* enfocar solo con puntero fino: en el teléfono el foco automático
+     levanta el teclado y tapa media pantalla */
+  if(matchMedia('(pointer:fine)').matches)$('chat-in').focus();
+};
 $('chat-form').onsubmit=function(e){e.preventDefault();
   var txt=$('chat-in').value.trim();if(!txt)return;
   $('chat-in').value='';chatLine(ME.name,txt,true);send({t:'chat',name:ME.name,txt:txt})};
@@ -1052,7 +1075,12 @@ function renderJugar(){
     d.onclick=function(){
       if(ms.role==='host'){var sv=savesMap()[ms.saveId];
         if(sv)resumeSave(ms.saveId,sv);else{toast('Esa partida ya no está guardada');mesaRemove(ms.room);renderJugar()}}
-      else location.href=ms.link;
+      else{
+        /* cambiar solo el hash no recarga la página: entrar directo */
+        netDown();
+        try{history.replaceState(null,'',location.pathname+'#g='+ms.room)}catch(e){}
+        joinRoom(ms.room);
+      }
     };
     grid.appendChild(d);
   });
@@ -1235,7 +1263,13 @@ function wireConn(conn){
   conn.on('close',function(){
     var i=NET.conns.indexOf(conn);if(i>=0)NET.conns.splice(i,1);
     if(conn._pid&&NET.players){delete NET.players[conn._pid];renderPlayers()}
-    if(!NET.isHost){toast('Se cerró la mesa del otro lado');}
+    if(!NET.isHost&&G&&!G.done&&NET.room){
+      /* que se note la desconexión y se reintente solo, en vez de seguir
+         jugando en silencio contra nadie */
+      var room=NET.room;netDown();
+      toast('Se perdió la conexión con la mesa; reintentando…',3500);
+      setTimeout(function(){joinRoom(room)},1600);
+    }
   });
 }
 function relay(from,m){if(!NET.isHost)return;
@@ -1280,10 +1314,11 @@ function onMsg(conn,m){
       }
       break;
     case 'grab':
-      if(G){G.lock[m.g]=conn._pid||'x';}
+      if(G){G.lock[m.g]=Date.now();}
       relay(conn,m);break;
     case 'mov':
-      if(G){var g=null;
+      if(G){if(G.lock[m.id])G.lock[m.id]=Date.now();
+        var g=null;
         for(var gi=0;gi<G.groups.length;gi++)if(gid(G.groups[gi])===m.id){g=G.groups[gi];break}
         if(g&&!g.fixed){g.x=m.x;g.y=m.y;if(m.r!==undefined)g.rot=m.r;
           var ii=G.groups.indexOf(g);G.groups.splice(ii,1);G.groups.push(g);
@@ -1356,6 +1391,9 @@ $('cuenta-ok').onclick=$('cuenta-close').onclick=function(){
   ME.name=$('name-in').value.trim()||ME.name;localStorage.setItem('jz-name',ME.name);
   refreshWho();renderPlayers();$('m-cuenta').classList.remove('on')};
 document.querySelectorAll('[data-v]').forEach(function(b){b.onclick=function(){showView(b.dataset.v)}});
+$('join-home').onclick=function(){
+  netDown();try{history.replaceState(null,'',location.pathname)}catch(e){}
+  $('m-join').classList.remove('on');show('scr-home');showView('jugar')};
 $('seek-mini').onclick=function(){showView('bib');$('lib-in').focus()};
 addEventListener('keydown',function(e){
   if((e.metaKey||e.ctrlKey)&&e.key==='k'&&$('scr-home').classList.contains('on')){
