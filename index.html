@@ -91,10 +91,10 @@ button{font-family:inherit;cursor:pointer}
   .topbar .nav,.topbar .seek{display:none}
   #scr-home>.shell{padding-bottom:120px}
   .jugar-top{grid-template-columns:1fr}
-  .tabsm{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--rule);padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
-  .tabsm button{flex:1;border:0;background:transparent;font:450 12px var(--sans);color:var(--ink3);padding:10px 0 12px;position:relative}
+  .tabsm{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--rule);padding:0 6px env(safe-area-inset-bottom,0px);z-index:20;box-shadow:0 -2px 10px rgba(25,27,23,.05)}
+  .tabsm button{flex:1;min-width:0;border:0;background:transparent;font:450 12px var(--sans);color:var(--ink3);padding:19px 2px 13px;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tabsm button.on{color:var(--ink);font-weight:600}
-  .tabsm button.on::before{content:"";position:absolute;top:0;left:50%;margin-left:-3px;width:6px;height:6px;border-radius:1px;background:var(--felt)}
+  .tabsm button.on::before{content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:1.5px;background:var(--felt)}
 }
 
 /* setup */
