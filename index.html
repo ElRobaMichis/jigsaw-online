@@ -116,14 +116,19 @@ button{font-family:inherit;cursor:pointer}
 /* game */
 #scr-game{position:fixed;inset:0;background:var(--felt);overflow:hidden;touch-action:none;display:none}
 #scr-game.on{display:block}
-#board{position:absolute;inset:0;touch-action:none;cursor:grab}
+#board{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
 .hud{position:absolute;background:var(--paper);border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.18)}
 #hud-prog{top:calc(env(safe-area-inset-top,0px) + 12px);left:12px;padding:9px 12px;display:flex;align-items:center;gap:11px}
 #hud-players{top:calc(env(safe-area-inset-top,0px) + 12px);right:12px;padding:9px 12px;display:flex;flex-direction:column;gap:6px;font-size:13px;max-width:190px}
-#dock{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:5px;background:var(--paper);border-radius:9px;box-shadow:0 2px 10px rgba(0,0,0,.18);max-width:calc(100vw - 16px);flex-wrap:wrap;justify-content:center}
-#dock button{border:0;background:transparent;font:450 13px var(--sans);color:var(--ink2);height:36px;min-width:36px;padding:0 11px;border-radius:6px;display:inline-flex;align-items:center;gap:6px}
+#dock{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:5px;background:var(--paper);border-radius:9px;box-shadow:0 2px 10px rgba(0,0,0,.18);max-width:calc(100vw - 16px)}
+#dock button{border:0;background:transparent;font:450 13px var(--sans);color:var(--ink2);height:36px;min-width:36px;padding:0 11px;border-radius:6px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 #dock button:hover{background:var(--board)}
-#dock .div{width:1px;height:20px;background:var(--rule);margin:0 4px}
+#dock .div{width:1px;height:20px;background:var(--rule);margin:0 4px;flex:none}
+@media(max-width:560px){
+  #dock{left:8px;right:8px;transform:none;justify-content:space-between;gap:0;padding:4px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px)}
+  #dock button{height:42px;padding:0 8px;font-size:12px;flex:1;justify-content:center}
+  #dock .div{display:none}
+}
 .pip{width:8px;height:8px;border-radius:50%;flex:none}
 
 /* modals */
@@ -524,7 +529,7 @@ $('start-btn').onclick=function(){
 /* ---------- núcleo del juego ---------- */
 function startGame(cfg){
   var im=new Image();
-  var ready=function(){buildGame(cfg,im);show('scr-game')};
+  var ready=function(){show('scr-game');buildGame(cfg,im)};
   if(cfg.src.type!=='data'){im.crossOrigin='anonymous';im.src=srcURL(cfg.src,1600,1200)}
   else im.src=cfg.src.data;
   if(im.complete&&im.naturalWidth)ready();else im.onload=ready;
@@ -582,13 +587,19 @@ function piecePos(g,idx){var a=pieceRC(g.pieces[0]),p=pieceRC(idx);
   return {x:g.x+v[0],y:g.y+v[1]}}
 
 /* ---------- render ---------- */
-var bctx=$('board').getContext('2d'),DPR=1;
+var bctx=$('board').getContext('2d'),DPR=1,BW=innerWidth,BH=innerHeight;
 function sizeBoard(){var cv=$('board');DPR=Math.min(2,window.devicePixelRatio||1);
-  cv.width=innerWidth*DPR;cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';if(G)G.dirty=true}
+  /* medir el elemento (inset:0), no la ventana: en iOS la barra del navegador
+     cambia la altura y dejaba una franja de fieltro sin canvas */
+  var r=cv.getBoundingClientRect();
+  BW=Math.max(1,Math.round(r.width));BH=Math.max(1,Math.round(r.height));
+  cv.width=BW*DPR;cv.height=BH*DPR;if(G)G.dirty=true}
 addEventListener('resize',sizeBoard);
+addEventListener('orientationchange',function(){setTimeout(sizeBoard,120)});
+if(window.visualViewport)visualViewport.addEventListener('resize',function(){setTimeout(sizeBoard,60)});
 function fitView(){if(!G)return;var mX=G.iw*0.8,mY=G.ih*0.5;
-  var s=Math.min(innerWidth/(G.iw+2*mX),innerHeight/(G.ih+2*mY));
-  G.cam.s=s;G.cam.x=G.iw/2-innerWidth/(2*s);G.cam.y=G.ih/2-innerHeight/(2*s);G.dirty=true}
+  var s=Math.min(BW/(G.iw+2*mX),BH/(G.ih+2*mY));
+  G.cam.s=s;G.cam.x=G.iw/2-BW/(2*s);G.cam.y=G.ih/2-BH/(2*s);G.dirty=true}
 function w2s(x,y){return [(x-G.cam.x)*G.cam.s,(y-G.cam.y)*G.cam.s]}
 function s2w(x,y){return [x/G.cam.s+G.cam.x,y/G.cam.s+G.cam.y]}
 function loop(){
@@ -599,7 +610,7 @@ function draw(){
   if(!G.dirty&&!Object.keys(G.remoteCursors).length)return;
   G.dirty=false;
   var x=bctx;x.setTransform(DPR,0,0,DPR,0,0);
-  x.fillStyle='#2E4A3C';x.fillRect(0,0,innerWidth,innerHeight);
+  x.fillStyle='#2E4A3C';x.fillRect(0,0,BW,BH);
   x.save();x.scale(G.cam.s,G.cam.s);x.translate(-G.cam.x,-G.cam.y);
   /* tapete marcado: sugerencia del área final */
   x.strokeStyle='rgba(232,238,232,.18)';x.lineWidth=2/G.cam.s;x.setLineDash([10/G.cam.s,8/G.cam.s]);
@@ -907,8 +918,8 @@ function streak(s){var n=0,d=new Date();
   return n}
 
 /* ---------- dock ---------- */
-$('d-zi').onclick=function(){zoomAt(innerWidth/2,innerHeight/2,1.25)};
-$('d-zo').onclick=function(){zoomAt(innerWidth/2,innerHeight/2,0.8)};
+$('d-zi').onclick=function(){zoomAt(BW/2,BH/2,1.25)};
+$('d-zo').onclick=function(){zoomAt(BW/2,BH/2,0.8)};
 $('d-fit').onclick=fitView;
 $('d-box').onclick=function(){$('preview-img').src=G.img.src;$('m-preview').classList.add('on')};
 $('close-preview').onclick=function(){$('m-preview').classList.remove('on')};
@@ -923,7 +934,7 @@ $('copy-link').onclick=function(){
   (navigator.clipboard?navigator.clipboard.writeText(ta.value):Promise.reject()).then(
     function(){toast('Enlace copiado')},
     function(){document.execCommand('copy');toast('Enlace copiado')})};
-function netDown(){try{if(NET.peer)NET.peer.destroy()}catch(e){}NET.peer=null;NET.conns=[];NET.room=null}
+function netDown(){clearTimeout(NET._retry);try{if(NET.peer)NET.peer.destroy()}catch(e){}NET.peer=null;NET.conns=[];NET.room=null}
 addEventListener('pagehide',netDown);
 $('d-exit').onclick=function(){if(confirm('¿Salir de la mesa? La partida queda guardada en este dispositivo.')){
   if(G&&!G.done)doSave();
@@ -1134,18 +1145,30 @@ function renderMis(f){
 document.querySelectorAll('[data-pf]').forEach(function(b){b.onclick=function(){renderMis(b.dataset.pf)}});
 
 /* ---------- red ---------- */
+/* STUN de Google + TURN público de Open Relay: mejora el cruce de redes
+   distintas (casas separadas, datos móviles) sin servidor propio */
+var PEERCFG={debug:0,config:{iceServers:[
+  {urls:'stun:stun.l.google.com:19302'},
+  {urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},
+  {urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'}
+]}};
+function keepAlive(p){
+  /* el broker corta sockets ociosos: reconectar conserva la sala y el enlace */
+  p.on('disconnected',function(){try{if(!p.destroyed)p.reconnect()}catch(e){}});
+}
 function hostRoom(seed){
   if(NET.peer)return;
   NET.isHost=true;
   /* sala derivada de la partida: el mismo enlace sigue sirviendo si recargás */
   seed=seed||(G&&G.cfg.seed);
   NET.room=seed?('jz-'+seed.toString(36)+'p'):('jz-'+shortId());
-  try{NET.peer=new Peer(NET.room,{debug:0})}catch(e){toast('Sin conexión: se juega igual en solitario');return}
+  try{NET.peer=new Peer(NET.room,PEERCFG)}catch(e){toast('Sin conexión: se juega igual en solitario');return}
+  keepAlive(NET.peer);
   NET.peer.on('open',function(){mesaMine()});
   NET.peer.on('error',function(err){
     if(err.type==='unavailable-id'){
       NET.peer=null;NET.room='jz-'+shortId();
-      try{NET.peer=new Peer(NET.room,{debug:0});NET.peer.on('connection',onConn);NET.peer.on('open',function(){mesaMine()})}catch(e2){}
+      try{NET.peer=new Peer(NET.room,PEERCFG);keepAlive(NET.peer);NET.peer.on('connection',onConn);NET.peer.on('open',function(){mesaMine()})}catch(e2){}
       toast('La mesa ya estaba abierta en otra pestaña; se abrió una nueva');
     }
   });
@@ -1178,18 +1201,33 @@ function sendImage(conn,durl){
   var CH=60000,n=Math.ceil(durl.length/CH);
   for(var i=0;i<n;i++)conn.send({t:'img',i:i,n:n,d:durl.slice(i*CH,(i+1)*CH)});
 }
-function joinRoom(room){
+function joinRoom(room,attempt){
+  attempt=attempt||1;
   $('m-join').classList.add('on');
+  $('join-status').textContent=attempt>1?('Reintentando… (intento '+attempt+' de 5)'):'Conectando con quien te invitó.';
   NET.isHost=false;NET.room=room;
-  try{NET.peer=new Peer({debug:0})}catch(e){$('join-status').textContent='No hay conexión a internet.';return}
+  function retry(msg){
+    try{if(NET.peer)NET.peer.destroy()}catch(e){}
+    NET.peer=null;NET.conns=[];
+    if(attempt>=5){$('join-status').textContent=msg+' Revisá la conexión y recargá para volver a intentar.';return}
+    $('join-status').textContent=msg+' Reintentando en unos segundos…';
+    NET._retry=setTimeout(function(){joinRoom(room,attempt+1)},2500*attempt);
+  }
+  try{NET.peer=new Peer(PEERCFG)}catch(e){retry('Sin señal.');return}
+  keepAlive(NET.peer);
+  var joined=false;
   NET.peer.on('open',function(){
     var conn=NET.peer.connect(room,{reliable:true});
     NET.hostConn=conn;NET.conns=[conn];
-    var to=setTimeout(function(){$('join-status').textContent='No se encuentra la mesa. ¿Sigue abierta la pestaña de quien invitó?'},12000);
-    conn.on('open',function(){clearTimeout(to);conn.send({t:'hola',me:{name:ME.name}})});
+    var to=setTimeout(function(){if(!joined)retry('La mesa no responde. ¿Sigue abierta la pestaña de quien invitó?')},14000);
+    conn.on('open',function(){joined=true;clearTimeout(to);conn.send({t:'hola',me:{name:ME.name}})});
     wireConn(conn);
   });
-  NET.peer.on('error',function(err){$('join-status').textContent='No se pudo conectar ('+err.type+'). Recargá para reintentar.'});
+  NET.peer.on('error',function(err){
+    if(joined)return;
+    if(err.type==='peer-unavailable')retry('La mesa no está abierta ahora mismo.');
+    else retry('No se pudo conectar ('+err.type+').');
+  });
 }
 var IMGBUF={};
 function wireConn(conn){

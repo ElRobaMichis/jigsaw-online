@@ -31,7 +31,7 @@ En un minuto queda en `https://<tu-usuario>.github.io/jigsaw-online/`. Cualquier
 ## Límites conocidos
 
 - La pestaña de quien invita debe seguir abierta: es donde vive la partida.
-- La conexión directa atraviesa la mayoría de las redes domésticas (STUN); en redes muy restrictivas puede no establecerse — no hay servidor TURN porque no hay servidor.
-- El broker público de PeerJS a veces tarda unos segundos en conectar.
+- La conexión directa usa STUN de Google y el TURN público gratuito de Open Relay, que cubre la mayoría de las redes (casas distintas, datos móviles); en redes corporativas muy cerradas puede fallar igualmente.
+- El broker público de PeerJS a veces tarda o falla al primer intento; entrar a una mesa reintenta solo hasta cinco veces con espera creciente.
 - Si la imagen propia es muy pesada, la partida se juega igual pero puede no caber en el guardado local.
 - Sin servidor no hay mesas públicas ni búsqueda de imágenes por descripción ni ranking global del puzzle del día: cualquier cosa que necesite un directorio compartido queda fuera por diseño.
