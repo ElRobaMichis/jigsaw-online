@@ -49,18 +49,53 @@ button{font-family:inherit;cursor:pointer}
 .brand{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.02em;font-variation-settings:'wdth' 88}
 .brand svg{width:30px;height:30px;overflow:visible}
 
-/* home */
-#scr-home .shell{padding-top:34px;padding-bottom:60px}
-.hero-h{font-family:var(--display);font-weight:800;font-size:clamp(28px,5.5vw,42px);line-height:1.02;letter-spacing:-.03em;font-variation-settings:'wdth' 85;margin:26px 0 10px;max-width:22ch}
-.hero-p{color:var(--ink2);max-width:56ch;margin-bottom:26px}
+/* home shell */
+.topbar{border-bottom:1px solid var(--rule);background:var(--board);position:sticky;top:0;z-index:10}
+.topbar .shell{display:flex;align-items:center;gap:26px;height:58px}
+.nav{display:flex;gap:22px;align-self:stretch;align-items:center}
+.nav button{border:0;background:transparent;font:450 14.5px var(--sans);color:var(--ink3);padding:0;height:100%;border-bottom:2px solid transparent;margin-bottom:-1px}
+.nav button:hover{color:var(--ink)}
+.nav button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--felt)}
+.seek{display:flex;align-items:center;gap:8px;height:34px;padding:0 12px;border:1px solid var(--rule);border-radius:6px;color:var(--ink3);font-size:13px;min-width:180px;background:var(--paper);cursor:text}
+.seek kbd{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink3)}
+.who{width:32px;height:32px;border-radius:50%;background:var(--board2);border:1px solid var(--rule);display:grid;place-items:center;font-size:11.5px;font-weight:600;color:var(--ink2);flex:none;cursor:pointer;padding:0}
+#scr-home>.shell{padding-top:26px;padding-bottom:90px}
+.sec-h{font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:-.02em}
+.pipdot{width:8px;height:8px;border-radius:50%;background:var(--felt);flex:none}
 .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px}
 .gal button{border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--board2);aspect-ratio:4/3;padding:0;position:relative}
 .gal button:hover{border-color:var(--ink)}
+.gal button.big{grid-column:span 2;grid-row:span 2}
 .gal img{width:100%;height:100%;object-fit:cover;display:block}
 .gal .up{display:grid;place-items:center;border-style:dashed;color:var(--ink3);font-size:13.5px;background:transparent}
-.cont-card{display:flex;gap:0;margin:20px 0 8px;max-width:560px;cursor:pointer}
-.cont-card .img{width:120px;flex:none;background:var(--board2)}
+.cont-card{display:flex;gap:0;cursor:pointer}
+.cont-card .img{width:150px;flex:none;background:var(--board2);min-height:120px}
 .cont-card .img img{width:100%;height:100%;object-fit:cover;display:block}
+.jugar-top{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:30px}
+.mesas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:14px}
+.mesa .img{height:104px;background:var(--board2);position:relative}
+.mesa .img img{width:100%;height:100%;object-fit:cover;display:block}
+.stamp{position:absolute;top:8px;left:8px;font-family:var(--mono);font-size:11px;background:var(--paper);border:1px solid var(--rule);border-radius:3px;padding:2px 7px}
+.mesa-open{border-style:dashed;display:grid;place-items:center;min-height:176px;cursor:pointer;color:var(--ink3);background:transparent}
+.metric{border-left:1px solid var(--rule);padding-left:14px}
+.metric .k{font-size:12.5px;color:var(--ink3)}
+.metric .v{font-family:var(--display);font-weight:600;font-size:24px;letter-spacing:-.02em}
+.metric .n{font-family:var(--mono);font-size:11.5px;color:var(--ink3)}
+.mis-list{margin-top:16px;border-top:1px solid var(--rule-soft)}
+.mis-row{display:flex;align-items:center;gap:14px;padding:12px 4px;border-bottom:1px solid var(--rule-soft)}
+.mis-row:hover{background:rgba(244,242,237,.55)}
+.mis-row .img{width:64px;height:46px;border-radius:5px;background:var(--board2);overflow:hidden;flex:none}
+.mis-row .img img{width:100%;height:100%;object-fit:cover;display:block}
+.tabsm{display:none}
+@media(max-width:760px){
+  .topbar .nav,.topbar .seek{display:none}
+  #scr-home>.shell{padding-bottom:120px}
+  .jugar-top{grid-template-columns:1fr}
+  .tabsm{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--rule);padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
+  .tabsm button{flex:1;border:0;background:transparent;font:450 12px var(--sans);color:var(--ink3);padding:10px 0 12px;position:relative}
+  .tabsm button.on{color:var(--ink);font-weight:600}
+  .tabsm button.on::before{content:"";position:absolute;top:0;left:50%;margin-left:-3px;width:6px;height:6px;border-radius:1px;background:var(--felt)}
+}
 
 /* setup */
 #scr-setup{background:var(--paper)}
@@ -109,54 +144,88 @@ button{font-family:inherit;cursor:pointer}
 </head>
 <body>
 
-<!-- ============ HOME ============ -->
+<!-- ============ HOME (shell) ============ -->
 <div class="scr on" id="scr-home">
-  <div class="shell">
-    <div class="row" style="padding-top:22px;gap:12px">
+  <div class="topbar">
+    <div class="shell">
       <div class="brand"><span id="brand-mark"></span>jigsaw</div>
+      <nav class="nav">
+        <button data-v="jugar" class="on">Jugar</button>
+        <button data-v="bib">Biblioteca</button>
+        <button data-v="mis">Mis puzzles</button>
+      </nav>
       <span class="grow"></span>
-      <label class="row" style="gap:8px;font-size:13px;color:var(--ink3)">Tu nombre
-        <input id="name-in" maxlength="14" style="width:110px;height:34px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);padding:0 10px;font:450 14px var(--sans);color:var(--ink)">
-      </label>
+      <span class="seek" id="seek-mini">Buscar imágenes<kbd>⌘K</kbd></span>
+      <button class="who" id="who-btn" aria-label="Tu cuenta">?</button>
     </div>
-
-    <h1 class="hero-h">Elegí una imagen y mandale el enlace. Nada más.</h1>
-    <p class="hero-p">Puzzles cooperativos para dos (o más): cada quien ve el cursor y las piezas del otro en vivo. Funciona entre teléfono y computadora, sin cuentas y sin instalar nada.</p>
-
-    <div id="stats-wrap" style="display:none;margin-bottom:26px">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px">
-        <div style="border-left:1px solid var(--rule);padding-left:14px"><div class="tiny dim">Piezas encajadas</div><div class="mono" style="font-family:var(--display);font-weight:600;font-size:24px" id="st-placed">0</div></div>
-        <div style="border-left:1px solid var(--rule);padding-left:14px"><div class="tiny dim">Resueltos</div><div class="mono" style="font-family:var(--display);font-weight:600;font-size:24px" id="st-solved">0</div></div>
-        <div style="border-left:1px solid var(--rule);padding-left:14px"><div class="tiny dim">Días seguidos</div><div class="mono" style="font-family:var(--display);font-weight:600;font-size:24px" id="st-streak">0</div></div>
-        <div style="border-left:1px solid var(--rule);padding-left:14px"><div class="tiny dim" id="st-best-k">Mejor tiempo</div><div class="mono" style="font-family:var(--display);font-weight:600;font-size:24px" id="st-best">—</div></div>
-      </div>
-      <div style="height:6px"></div>
-    </div>
-
-    <div id="cont-wrap" style="display:none">
-      <p class="cap">Continuar donde lo dejaron</p>
-      <div id="saves-list" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;max-width:620px"></div>
-      <div style="height:26px"></div>
-    </div>
-
-    <div class="tile cont-card" id="dia-card" style="margin:0 0 26px">
-      <div class="img"><img id="dia-img" alt=""></div>
-      <div style="padding:14px 16px;flex:1">
-        <p class="cap">Puzzle del día</p>
-        <div style="font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-.02em" id="dia-title"></div>
-        <div class="mono tiny dim" id="dia-meta" style="margin:4px 0 10px">La misma imagen para todo el mundo, cada día.</div>
-        <span class="b b--sm b--fill">Armarlo</span>
-      </div>
-    </div>
-
-    <div class="row" style="gap:10px;flex-wrap:wrap">
-      <p class="cap" style="align-self:center">Imágenes libres</p>
-      <span class="grow"></span>
-      <button class="b b--sm" id="regal">Otras imágenes</button>
-    </div>
-    <div class="gal" id="gal"></div>
-    <p class="tiny dim" style="margin-top:14px">Fotos de <a href="https://picsum.photos" style="color:var(--felt)">Lorem Picsum</a> (libres de derechos). Las imágenes propias no salen de sus dos dispositivos.</p>
   </div>
+
+  <div class="shell">
+    <!-- ······ JUGAR ······ -->
+    <section id="v-jugar">
+      <p class="tiny dim" id="intro" style="max-width:62ch;margin-bottom:22px">Puzzles cooperativos: elegí una imagen en la <b>Biblioteca</b>, mandale el enlace a quien quieras y armen juntos viendo el cursor del otro — teléfono o computadora, sin cuentas.</p>
+      <div class="jugar-top" id="jugar-top"></div>
+      <div class="row" style="gap:11px;flex-wrap:wrap">
+        <span class="pipdot"></span>
+        <h2 class="sec-h">Mesas abiertas</h2>
+        <span class="mono tiny dim" id="mesas-n"></span>
+        <span class="grow"></span>
+        <button class="tag tag--on" data-mf="todas">Todas</button>
+        <button class="tag" data-mf="hueco">Con hueco</button>
+        <button class="tag" data-mf="chicas">Menos de 300</button>
+        <button class="tag" data-mf="cuentas">Solo cuentas</button>
+      </div>
+      <div class="mesas-grid" id="mesas-grid"></div>
+      <p class="tiny dim" style="margin-top:14px">Las mesas viven en la pestaña de quien las abre. Acá aparecen las tuyas y las que visitaste; a una ajena se entra con su enlace.</p>
+    </section>
+
+    <!-- ······ BIBLIOTECA ······ -->
+    <section id="v-bib" hidden>
+      <div class="row" style="gap:12px;border:1px solid var(--ink);border-radius:7px;padding:0 14px;height:48px;margin-bottom:14px;background:var(--paper)">
+        <input id="lib-in" placeholder="gato durmiendo junto a una ventana…" style="flex:1;min-width:0;border:0;background:transparent;font:400 15px var(--sans);color:var(--ink);outline:none">
+        <span class="pipdot" id="lib-pip" style="display:none"></span>
+        <span class="mono tiny" id="lib-note" style="color:var(--felt)"></span>
+      </div>
+      <div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:6px">
+        <button class="tag tag--on" data-kw="">Todo</button>
+        <button class="tag" data-kw="animal">Animales</button>
+        <button class="tag" data-kw="landscape">Paisajes</button>
+        <button class="tag" data-kw="painting">Arte</button>
+        <button class="tag" data-kw="city">Ciudades</button>
+        <button class="tag" data-kw="food">Comida</button>
+        <span class="grow"></span>
+        <button class="b b--sm" id="regal">Otras</button>
+      </div>
+      <div class="gal" id="gal"></div>
+      <p class="tiny dim" style="margin-top:14px">Fotos libres de <a href="https://picsum.photos" style="color:var(--felt)">Lorem Picsum</a> y <a href="https://loremflickr.com" style="color:var(--felt)">LoremFlickr</a>. Las imágenes propias no salen de sus dispositivos.</p>
+    </section>
+
+    <!-- ······ MIS PUZZLES ······ -->
+    <section id="v-mis" hidden>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:24px">
+        <div class="metric"><div class="k">Piezas encajadas</div><div class="v mono" id="st-placed">0</div><div class="n" id="st-placed-n"></div></div>
+        <div class="metric"><div class="k">Resueltos</div><div class="v mono" id="st-solved">0</div><div class="n">&nbsp;</div></div>
+        <div class="metric"><div class="k">Días seguidos</div><div class="v mono" id="st-streak">0</div><div class="n" id="st-streak-n"></div></div>
+        <div class="metric"><div class="k" id="st-best-k">Mejor tiempo</div><div class="v mono" id="st-best">—</div><div class="n" id="st-best-n"></div></div>
+      </div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <button class="tag tag--on" data-pf="curso">En curso <span class="mono tiny" style="opacity:.6" id="n-curso"></span></button>
+        <button class="tag" data-pf="hechos">Terminados <span class="mono tiny" style="opacity:.6" id="n-hechos"></span></button>
+        <button class="tag" data-pf="marcados">Guardados <span class="mono tiny" style="opacity:.6" id="n-marcados"></span></button>
+        <button class="tag" data-pf="mias">Míos <span class="mono tiny" style="opacity:.6" id="n-mias"></span></button>
+        <span class="grow"></span>
+        <button class="tag" data-pf="archivo">Archivo</button>
+      </div>
+      <div class="mis-list" id="mis-list"></div>
+    </section>
+  </div>
+
+  <nav class="tabsm">
+    <button data-v="jugar" class="on">Jugar</button>
+    <button data-v="bib">Biblioteca</button>
+    <button data-v="mis">Mis puzzles</button>
+    <button id="who-btn-m">Cuenta</button>
+  </nav>
 </div>
 
 <!-- ============ SETUP ============ -->
@@ -165,6 +234,7 @@ button{font-family:inherit;cursor:pointer}
     <div class="setup-img">
       <img id="setup-img" alt="Imagen elegida">
       <button class="b b--sm" style="position:absolute;top:14px;left:14px" id="setup-back">← Elegir otra</button>
+      <button class="b b--sm" style="position:absolute;bottom:14px;left:14px" id="setup-mark">Guardar imagen</button>
     </div>
     <aside class="setup-panel">
       <div>
@@ -259,6 +329,20 @@ button{font-family:inherit;cursor:pointer}
     </div>
   </div>
 </div>
+<div class="veil" id="m-cuenta">
+  <div class="modal">
+    <h3>Tu cuenta</h3>
+    <p>Sin registros: solo el nombre que ve la otra persona en la mesa. Todo lo demás vive en este dispositivo.</p>
+    <label class="row" style="gap:10px;margin:16px 0 14px;font-size:14px">Nombre
+      <input id="name-in" maxlength="14" style="flex:1;height:38px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);padding:0 10px;font:450 15px var(--sans);color:var(--ink)">
+    </label>
+    <div class="row" style="gap:8px">
+      <button class="b b--fill" id="cuenta-ok">Listo</button>
+      <span class="grow"></span>
+      <button class="b" id="cuenta-close">Cerrar</button>
+    </div>
+  </div>
+</div>
 <div class="veil" id="m-join">
   <div class="modal" style="text-align:center">
     <h3>Entrando a la mesa…</h3>
@@ -325,45 +409,89 @@ var COLORS=['#2E4A3C','#8A6E2F','#5A4A6E','#7A3B2E'];
 var G=null;      /* partida activa */
 var NET={peer:null,conns:[],isHost:true,hostConn:null,room:null,players:{}};
 
-/* ---------- galería ---------- */
-var GAL_SEEDS=[];
-function fillGal(){
-  var gal=$('gal');gal.innerHTML='';
-  GAL_SEEDS=[];for(var i=0;i<7;i++)GAL_SEEDS.push('jz-'+Math.floor(Math.random()*99999));
-  GAL_SEEDS.forEach(function(seed){
-    var b=document.createElement('button');b.setAttribute('aria-label','Elegir esta imagen');
-    var im=new Image();im.src=picsum(seed,400,300);im.alt='';b.appendChild(im);
-    b.onclick=function(){openSetup({type:'seed',seed:seed})};
-    gal.appendChild(b);
-  });
-  var up=document.createElement('button');up.className='up';up.textContent='＋ Subir una imagen propia';
-  up.onclick=function(){var f=document.createElement('input');f.type='file';f.accept='image/*';
-    f.onchange=function(){var file=f.files[0];if(!file)return;
-      var rd=new FileReader();rd.onload=function(){downscale(rd.result,1600,function(durl){openSetup({type:'data',data:durl})})};
-      rd.readAsDataURL(file)};
-    f.click()};
-  gal.appendChild(up);
-}
+/* ---------- fuentes de imagen ----------
+   seed → Lorem Picsum (aleatoria estable); kw → LoremFlickr por palabra
+   clave con lock determinista (misma imagen para ambos lados); data → propia. */
 function picsum(seed,w,h){return 'https://picsum.photos/seed/'+seed+'/'+w+'/'+h}
+function srcURL(src,w,h){
+  if(src.type==='seed')return picsum(src.seed,w,h);
+  if(src.type==='kw')return 'https://loremflickr.com/'+w+'/'+h+'/'+encodeURIComponent(src.kw)+'/all?lock='+src.lock;
+  return src.data;
+}
+function srcTitle(src){
+  if(src.type==='kw')return src.kw.charAt(0).toUpperCase()+src.kw.slice(1).replace(/,/g,' · ');
+  if(src.type==='seed')return src.seed.indexOf('dia-')===0?'Puzzle del día':'Fotografía';
+  return 'Imagen propia';
+}
 function downscale(durl,max,cb){var im=new Image();im.onload=function(){
   var sc=Math.min(1,max/Math.max(im.width,im.height));
   var cv=document.createElement('canvas');cv.width=Math.round(im.width*sc);cv.height=Math.round(im.height*sc);
   cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
   cb(cv.toDataURL('image/jpeg',0.82))};im.src=durl}
 
+/* ---------- biblioteca ---------- */
+var LIB={kw:'',n:0};
+function renderLib(){
+  var gal=$('gal');gal.innerHTML='';
+  var srcs=[];
+  if(LIB.kw){
+    for(var i=0;i<12;i++)srcs.push({type:'kw',kw:LIB.kw,lock:Math.floor(Math.random()*9999)});
+    $('lib-note').textContent='12 resultados de «'+LIB.kw+'»';$('lib-pip').style.display='';
+  } else {
+    for(var j=0;j<12;j++)srcs.push({type:'seed',seed:'jz-'+Math.floor(Math.random()*99999)});
+    $('lib-note').textContent='';$('lib-pip').style.display='none';
+  }
+  srcs.forEach(function(src,i){
+    var b=document.createElement('button');b.setAttribute('aria-label','Elegir esta imagen');
+    if(i===0)b.className='big';
+    var im=new Image();im.loading='lazy';im.src=srcURL(src,400,300);im.alt='';b.appendChild(im);
+    b.onclick=function(){openSetup(src)};
+    gal.appendChild(b);
+  });
+  var up=document.createElement('button');up.className='up';up.textContent='＋ Subir una imagen propia';
+  up.onclick=pickUpload;
+  gal.appendChild(up);
+}
+function pickUpload(){var f=document.createElement('input');f.type='file';f.accept='image/*';
+  f.onchange=function(){var file=f.files[0];if(!file)return;
+    var rd=new FileReader();rd.onload=function(){downscale(rd.result,1600,function(durl){
+      downscale(durl,560,function(thumb){
+        var m=store('jz-mias');m.unshift({data:durl,thumb:thumb,ts:Date.now()});
+        while(m.length>4)m.pop();storeW('jz-mias',m);
+      });
+      openSetup({type:'data',data:durl});
+    })};
+    rd.readAsDataURL(file)};
+  f.click()}
+
+/* ---------- almacenes ---------- */
+function store(k){try{return JSON.parse(localStorage.getItem(k))||[]}catch(e){return []}}
+function storeW(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
 /* ---------- setup ---------- */
 var SETUP={src:null,img:null,count:200,box:true,rot:false,priv:'link'};
 function openSetup(src){
   SETUP.src=src;
   var im=new Image();
-  if(src.type==='seed'){im.crossOrigin='anonymous';im.src=picsum(src.seed,1600,1200)}
+  if(src.type!=='data'){im.crossOrigin='anonymous';im.src=srcURL(src,1600,1200)}
   else im.src=src.data;
   im.onload=function(){SETUP.img=im;
     $('setup-img').src=im.src;
-    $('setup-dims').textContent=im.naturalWidth+' × '+im.naturalHeight+(src.type==='seed'?' · Lorem Picsum':' · imagen propia');
-    show('scr-setup');buildPresets()};
+    $('setup-dims').textContent=srcTitle(src)+' · '+im.naturalWidth+' × '+im.naturalHeight;
+    markUI();show('scr-setup');buildPresets()};
   im.onerror=function(){toast('No se pudo cargar la imagen. Probá con otra.')};
 }
+function srcKey(src){return src.type+':'+(src.seed||src.kw&&src.kw+'#'+src.lock||'propia')}
+function isMarked(src){return store('jz-marcados').some(function(m){return srcKey(m.src)===srcKey(src)})}
+function markUI(){$('setup-mark').textContent=isMarked(SETUP.src)?'Guardada ✓':'Guardar imagen';
+  $('setup-mark').style.display=SETUP.src.type==='data'?'none':''}
+$('setup-mark').onclick=function(){
+  var m=store('jz-marcados'),key=srcKey(SETUP.src);
+  var i=m.findIndex(function(x){return srcKey(x.src)===key});
+  if(i>=0){m.splice(i,1);toast('Quitada de guardadas')}
+  else{m.unshift({src:SETUP.src,ts:Date.now()});toast('Guardada en Mis puzzles')}
+  while(m.length>24)m.pop();storeW('jz-marcados',m);markUI();
+};
 function gridFor(img,n){var ar=img.naturalWidth/img.naturalHeight;
   var cols=Math.max(2,Math.round(Math.sqrt(n*ar)));var rows=Math.max(2,Math.round(cols/ar));
   return {cols:cols,rows:rows}}
@@ -399,7 +527,7 @@ $('start-btn').onclick=function(){
 function startGame(cfg){
   var im=new Image();
   var ready=function(){buildGame(cfg,im);show('scr-game')};
-  if(cfg.src.type==='seed'){im.crossOrigin='anonymous';im.src=picsum(cfg.src.seed,1600,1200)}
+  if(cfg.src.type!=='data'){im.crossOrigin='anonymous';im.src=srcURL(cfg.src,1600,1200)}
   else im.src=cfg.src.data;
   if(im.complete&&im.naturalWidth)ready();else im.onload=ready;
   im.onerror=function(){toast('No se pudo cargar la imagen.')};
@@ -526,11 +654,26 @@ function updateHUD(){
   for(var gi2=0;gi2<G.groups.length;gi2++){var g=G.groups[gi2];
     if(g.pieces.length<2)continue;
     for(var k=0;k<g.pieces.length;k++){var rc=pieceRC(g.pieces[k]);c.fillRect(rc.c,rc.r,1,1)}}
+  if(NET.room){if(NET.isHost)mesaMine();else mesaGuest()}
   if(G.groups.length===1&&total>1&&!G.done){G.done=true;win()}
+}
+function mesaGuest(){
+  if(!G||!NET.room)return;
+  var now=Date.now();if(now-mesaTh<4000)return;mesaTh=now;
+  mesaUpsert({room:NET.room,role:'guest',
+    title:srcTitle(G.cfg.src),pieces:G.cols*G.rows,
+    pct:joinedCount()/(G.cols*G.rows),players:Object.keys(NET.players).length+1,
+    thumb:G.cfg.src.type!=='data'?srcURL(G.cfg.src,300,220):null,
+    mx:{c:G.cols,r:G.rows,g:G.groups.filter(function(g){return g.pieces.length>1}).map(function(g){return g.pieces})},
+    link:location.origin+location.pathname+'#g='+NET.room,ts:now});
 }
 function win(){
   var total=G.cols*G.rows;
   statWin(total,G.elapsed);
+  var h=store('jz-hechos');
+  h.unshift({src:G.cfg.src.type!=='data'?G.cfg.src:null,title:srcTitle(G.cfg.src),total:total,sec:G.elapsed,ts:Date.now()});
+  while(h.length>30)h.pop();storeW('jz-hechos',h);
+  if(NET.room)mesaRemove(NET.room);
   var best=stats().best[total];
   $('done-title').textContent='¡Terminado!';
   $('done-meta').textContent=total+' piezas en '+fmtT(G.elapsed)+(best<G.elapsed?' · su récord en este tamaño: '+fmtT(best):' · récord nuevo en este tamaño')+'.';
@@ -817,72 +960,230 @@ function doSave(){
   savesWrite(m);
 }
 function clearSave(){var m=savesMap();delete m[G.saveId];savesWrite(m)}
-function loadHome(){
-  /* estadísticas */
-  var s=stats();
-  if(s.placed||s.solved){
-    $('stats-wrap').style.display='';
-    $('st-placed').textContent=(s.placed||0).toLocaleString('es');
-    $('st-solved').textContent=s.solved||0;
-    $('st-streak').textContent=streak(s);
-    var bestK=null;if(s.best)for(var k in s.best)if(bestK===null||+k>+bestK)bestK=k;
-    if(bestK){$('st-best-k').textContent='Mejor · '+bestK+' pz';$('st-best').textContent=fmtT(s.best[bestK])}
-  }
-  /* partidas guardadas */
-  var m=savesMap(),ids=Object.keys(m);
+/* ---------- vistas del shell ---------- */
+var VIEW='jugar';
+function showView(v){
+  VIEW=v;
+  ['jugar','bib','mis'].forEach(function(k){
+    $('v-'+(k==='jugar'?'jugar':k)).hidden=k!==v;
+  });
+  document.querySelectorAll('[data-v]').forEach(function(b){b.classList.toggle('on',b.dataset.v===v)});
+  if(v==='jugar')renderJugar();
+  if(v==='mis')renderMis(MISF);
+  if(v==='bib'&&!$('gal').children.length)renderLib();
+}
+function timeago(ts){var s=(Date.now()-ts)/1000;
+  if(s<90)return 'recién';if(s<3600)return 'hace '+Math.round(s/60)+' min';
+  if(s<86400)return 'hace '+Math.round(s/3600)+' h';return 'hace '+Math.round(s/86400)+' días'}
+function saveJoined(sv){var j=0;sv.state.groups.forEach(function(g){if(g.pieces.length>1)j+=g.pieces.length});return j}
+function miniMatrix(cols,rows,groups){
+  var cv=document.createElement('canvas');cv.width=cols;cv.height=rows;
+  cv.style.cssText='width:'+cols*3+'px;height:'+rows*3+'px;image-rendering:pixelated;flex:none';
+  var c=cv.getContext('2d');c.fillStyle='#DAD5C8';c.fillRect(0,0,cols,rows);c.fillStyle='#2E4A3C';
+  groups.forEach(function(g){if(g.pieces.length<2)return;
+    g.pieces.forEach(function(p){c.fillRect(p%cols,Math.floor(p/cols),1,1)})});
+  return cv;
+}
+function resumeSave(id,sv){
+  startGame({src:sv.cfg.src,cols:sv.cfg.cols,rows:sv.cfg.rows,seed:sv.cfg.seed,box:sv.cfg.box,rot:sv.cfg.rot,priv:sv.cfg.priv,elapsed:sv.state.elapsed,state:sv.state});
+  if(sv.cfg.priv!=='solo')hostRoom();
+}
+
+/* ---------- mesas conocidas ---------- */
+function mesaAll(){return store('jz-mesas')}
+function mesaUpsert(m){
+  var all=mesaAll(),i=all.findIndex(function(x){return x.room===m.room});
+  if(i>=0)all[i]=Object.assign(all[i],m);else all.unshift(m);
+  all.sort(function(a,b){return b.ts-a.ts});while(all.length>12)all.pop();
+  storeW('jz-mesas',all);
+}
+function mesaRemove(room){storeW('jz-mesas',mesaAll().filter(function(x){return x.room!==room}))}
+var MF='todas';
+function renderJugar(){
+  /* arriba: continuar + día */
+  var top=$('jugar-top');top.innerHTML='';
+  var m=savesMap(),ids=Object.keys(m).filter(function(id){return !m[id].archived});
   ids.sort(function(a,b){return m[b].ts-m[a].ts});
   if(ids.length){
-    $('cont-wrap').style.display='';
-    var list=$('saves-list');list.innerHTML='';
-    ids.forEach(function(id){
-      var sv=m[id],total=sv.cfg.cols*sv.cfg.rows,joined=0;
-      sv.state.groups.forEach(function(g){if(g.pieces.length>1)joined+=g.pieces.length});
-      var d=document.createElement('div');d.className='tile cont-card';d.style.margin='0';
-      d.innerHTML='<div class="img"><img alt=""></div>'+
-        '<div style="padding:12px 14px;flex:1;min-width:0">'+
-        '<div style="font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:-.02em">'+total+' piezas</div>'+
-        '<div class="mono tiny dim" style="margin:3px 0 8px">'+joined+' encajadas · '+fmtT(sv.state.elapsed)+'</div>'+
-        '<span class="b b--sm b--fill">Reanudar</span> '+
-        '<button class="b b--sm" data-del aria-label="Borrar partida">Borrar</button></div>';
-      d.querySelector('img').src=sv.cfg.src.type==='seed'?picsum(sv.cfg.src.seed,240,180):sv.cfg.src.data;
-      d.querySelector('[data-del]').onclick=function(e){e.stopPropagation();
-        if(!confirm('¿Borrar esta partida guardada?'))return;
-        var mm=savesMap();delete mm[id];savesWrite(mm);loadHome()};
-      d.onclick=function(){
-        startGame({src:sv.cfg.src,cols:sv.cfg.cols,rows:sv.cfg.rows,seed:sv.cfg.seed,box:sv.cfg.box,rot:sv.cfg.rot,priv:sv.cfg.priv,elapsed:sv.state.elapsed,state:sv.state});
-        if(sv.cfg.priv!=='solo')hostRoom();
-      };
-      list.appendChild(d);
-    });
-  } else $('cont-wrap').style.display='none';
-  /* puzzle del día: misma imagen para todo el mundo */
+    var sv=m[ids[0]],total=sv.cfg.cols*sv.cfg.rows;
+    var d=document.createElement('div');d.className='tile cont-card';
+    d.innerHTML='<div class="img"><img alt=""></div>'+
+      '<div style="padding:16px 18px;flex:1;min-width:0;display:flex;flex-direction:column">'+
+      '<span class="cap">Continuar donde lo dejaron</span>'+
+      '<div style="font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:-.02em;margin:5px 0 10px">'+esc(srcTitle(sv.cfg.src))+' · '+total+' piezas</div>'+
+      '<div class="row" style="gap:12px;margin-top:auto"><span data-mx></span>'+
+      '<span class="mono tiny dim">'+saveJoined(sv)+' / '+total+'<br>'+fmtT(sv.state.elapsed)+'</span>'+
+      '<span class="grow"></span><span class="b b--sm b--fill">Reanudar</span></div></div>';
+    d.querySelector('img').src=srcURL(sv.cfg.src,300,220);
+    d.querySelector('[data-mx]').appendChild(miniMatrix(sv.cfg.cols,sv.cfg.rows,sv.state.groups));
+    d.onclick=function(){resumeSave(ids[0],m[ids[0]])};
+    top.appendChild(d);
+  }
   var today=new Date().toISOString().slice(0,10);
-  var diaSeed='dia-'+today;
-  $('dia-img').src=picsum(diaSeed,240,180);
-  $('dia-title').textContent='El del '+new Date().toLocaleDateString('es',{day:'numeric',month:'long'});
-  $('dia-card').onclick=function(){openSetup({type:'seed',seed:diaSeed})};
+  var dd=document.createElement('div');dd.className='tile cont-card';
+  dd.innerHTML='<div class="img"><img alt=""></div>'+
+    '<div style="padding:16px 18px;flex:1;display:flex;flex-direction:column">'+
+    '<span class="cap">Puzzle del día</span>'+
+    '<div style="font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:-.02em;margin:5px 0 4px">El del '+new Date().toLocaleDateString('es',{day:'numeric',month:'long'})+'</div>'+
+    '<div class="tiny dim">La misma imagen para todo el mundo.</div>'+
+    '<div style="margin-top:auto;padding-top:12px"><span class="b b--sm b--fill">Armarlo</span></div></div>';
+  dd.querySelector('img').src=picsum('dia-'+today,300,220);
+  dd.onclick=function(){openSetup({type:'seed',seed:'dia-'+today})};
+  top.appendChild(dd);
+  $('intro').style.display=ids.length?'none':'';
+  /* mesas */
+  var all=mesaAll().filter(function(x){
+    if(MF==='hueco')return (x.players||1)<10;
+    if(MF==='chicas')return x.pieces<300;
+    return true;
+  });
+  $('mesas-n').textContent=all.length?all.length+' a la vista':'';
+  var grid=$('mesas-grid');grid.innerHTML='';
+  all.forEach(function(ms){
+    var d=document.createElement('div');d.className='tile mesa';d.style.cursor='pointer';
+    d.innerHTML='<div class="img"><img alt=""><span class="stamp">'+ms.pieces+' pz</span></div>'+
+      '<div style="padding:11px 13px">'+
+      '<div style="font-size:14px;font-weight:600;margin-bottom:8px">'+esc(ms.title)+'</div>'+
+      '<div class="row" style="gap:10px"><span data-mx></span>'+
+      '<span class="mono tiny dim">'+Math.round((ms.pct||0)*100)+' %<br>'+(ms.players||1)+' / 10 · '+timeago(ms.ts)+'</span></div>'+
+      '<div class="tiny dim" style="margin-top:8px">'+(ms.role==='host'?'Tu mesa · reabrir':'Con enlace · volver')+'</div></div>';
+    if(ms.thumb)d.querySelector('img').src=ms.thumb;
+    if(ms.mx)d.querySelector('[data-mx]').appendChild(miniMatrix(ms.mx.c,ms.mx.r,ms.mx.g.map(function(p){return {pieces:p}})));
+    d.onclick=function(){
+      if(ms.role==='host'){var sv=savesMap()[ms.saveId];
+        if(sv)resumeSave(ms.saveId,sv);else{toast('Esa partida ya no está guardada');mesaRemove(ms.room);renderJugar()}}
+      else location.href=ms.link;
+    };
+    grid.appendChild(d);
+  });
+  var open=document.createElement('button');open.className='tile mesa-open';
+  open.innerHTML='<div style="text-align:center"><div style="font-size:22px;margin-bottom:6px">＋</div><div style="font-size:13.5px;font-weight:600;color:var(--ink)">Abrir una mesa</div><div class="tiny dim" style="margin-top:3px">Elegí una imagen en la Biblioteca</div></div>';
+  open.onclick=function(){showView('bib')};
+  grid.appendChild(open);
 }
+document.querySelectorAll('[data-mf]').forEach(function(b){
+  b.onclick=function(){
+    if(b.dataset.mf==='cuentas'){toast('En esta versión no hay cuentas: entra quien tenga el enlace.');return}
+    MF=b.dataset.mf;
+    document.querySelectorAll('[data-mf]').forEach(function(x){x.classList.toggle('tag--on',x===b)});
+    renderJugar();
+  };
+});
+
+/* ---------- mis puzzles ---------- */
+var MISF='curso';
+function misRow(imgSrc,title,sub,btns){
+  var d=document.createElement('div');d.className='mis-row';
+  d.innerHTML='<div class="img"><img alt=""></div>'+
+    '<div style="flex:1;min-width:0"><div style="font-size:14.5px;font-weight:600">'+title+'</div>'+
+    '<div class="mono tiny dim" style="margin-top:2px">'+sub+'</div></div>';
+  if(imgSrc)d.querySelector('img').src=imgSrc;
+  btns.forEach(function(bt){
+    var b=document.createElement('button');b.className='b b--sm'+(bt.fill?' b--fill':'');
+    b.textContent=bt.txt;b.onclick=function(e){e.stopPropagation();bt.fn()};
+    d.appendChild(b)});
+  return d;
+}
+function renderMis(f){
+  MISF=f;
+  document.querySelectorAll('[data-pf]').forEach(function(b){b.classList.toggle('tag--on',b.dataset.pf===f)});
+  var s=stats();
+  $('st-placed').textContent=(s.placed||0).toLocaleString('es');
+  $('st-solved').textContent=s.solved||0;
+  $('st-streak').textContent=streak(s);
+  $('st-streak-n').textContent=s.rec?('récord: '+s.rec):'';
+  var bestK=null;if(s.best)for(var k in s.best)if(bestK===null||+k>+bestK)bestK=k;
+  $('st-best-k').textContent=bestK?('Mejor · '+bestK+' pz'):'Mejor tiempo';
+  $('st-best').textContent=bestK?fmtT(s.best[bestK]):'—';
+  var m=savesMap();
+  $('n-curso').textContent=Object.keys(m).filter(function(i){return !m[i].archived}).length||'';
+  $('n-hechos').textContent=store('jz-hechos').length||'';
+  $('n-marcados').textContent=store('jz-marcados').length||'';
+  $('n-mias').textContent=store('jz-mias').length||'';
+  var list=$('mis-list');list.innerHTML='';
+  function empty(txt){var d=document.createElement('p');d.className='tiny dim';d.style.padding='18px 4px';d.textContent=txt;list.appendChild(d)}
+  if(f==='curso'||f==='archivo'){
+    var ids=Object.keys(m).filter(function(i){return f==='archivo'?m[i].archived:!m[i].archived});
+    ids.sort(function(a,b){return m[b].ts-m[a].ts});
+    if(!ids.length)empty(f==='archivo'?'Nada archivado.':'Ninguna partida en curso: abrí una mesa desde la Biblioteca.');
+    ids.forEach(function(id){var sv=m[id],total=sv.cfg.cols*sv.cfg.rows;
+      var btns=f==='archivo'
+        ?[{txt:'Recuperar',fn:function(){sv.archived=false;var mm=savesMap();mm[id].archived=false;savesWrite(mm);renderMis(f)}},
+          {txt:'Borrar',fn:function(){if(confirm('¿Borrar esta partida?')){var mm=savesMap();delete mm[id];savesWrite(mm);renderMis(f)}}}]
+        :[{txt:'Reanudar',fill:true,fn:function(){resumeSave(id,sv)}},
+          {txt:'Archivar',fn:function(){var mm=savesMap();mm[id].archived=true;savesWrite(mm);renderMis(f)}}];
+      var row=misRow(srcURL(sv.cfg.src,160,120),esc(srcTitle(sv.cfg.src))+' · '+total+' pz',
+        saveJoined(sv)+' encajadas · '+fmtT(sv.state.elapsed)+' · '+timeago(sv.ts),btns);
+      row.insertBefore(miniMatrix(sv.cfg.cols,sv.cfg.rows,sv.state.groups),row.children[2]);
+      list.appendChild(row)});
+  }
+  if(f==='hechos'){
+    var h=store('jz-hechos');
+    if(!h.length)empty('Todavía no terminaron ninguno.');
+    h.forEach(function(w){
+      list.appendChild(misRow(w.src?srcURL(w.src,160,120):null,esc(w.title)+' · '+w.total+' pz',
+        fmtT(w.sec)+' · '+new Date(w.ts).toLocaleDateString('es'),
+        w.src?[{txt:'Repetir',fn:function(){openSetup(w.src)}}]:[]))});
+  }
+  if(f==='marcados'){
+    var mk=store('jz-marcados');
+    if(!mk.length)empty('Guardá imágenes desde la pantalla de preparación.');
+    mk.forEach(function(x){
+      list.appendChild(misRow(srcURL(x.src,160,120),esc(srcTitle(x.src)),timeago(x.ts),
+        [{txt:'Armar',fill:true,fn:function(){openSetup(x.src)}},
+         {txt:'Quitar',fn:function(){storeW('jz-marcados',store('jz-marcados').filter(function(y){return srcKey(y.src)!==srcKey(x.src)}));renderMis(f)}}]))});
+  }
+  if(f==='mias'){
+    var mi=store('jz-mias');
+    if(!mi.length)empty('Subí una imagen propia desde la Biblioteca.');
+    mi.forEach(function(x,i){
+      list.appendChild(misRow(x.thumb,'Imagen propia',timeago(x.ts),
+        [{txt:'Armar',fill:true,fn:function(){openSetup({type:'data',data:x.data})}},
+         {txt:'Quitar',fn:function(){var a=store('jz-mias');a.splice(i,1);storeW('jz-mias',a);renderMis(f)}}]))});
+  }
+}
+document.querySelectorAll('[data-pf]').forEach(function(b){b.onclick=function(){renderMis(b.dataset.pf)}});
 
 /* ---------- red ---------- */
 function hostRoom(){
   if(NET.peer)return;
-  NET.isHost=true;NET.room='jz-'+shortId();
+  NET.isHost=true;
+  /* sala derivada de la partida: el mismo enlace sigue sirviendo si recargás */
+  NET.room=G?('jz-'+G.cfg.seed.toString(36)+'p'):('jz-'+shortId());
   try{NET.peer=new Peer(NET.room,{debug:0})}catch(e){toast('Sin conexión: se juega igual en solitario');return}
-  NET.peer.on('open',function(){/* listo para invitar */});
+  NET.peer.on('open',function(){mesaMine()});
   NET.peer.on('error',function(err){
-    if(err.type==='unavailable-id'){NET.peer=null;NET.room=null;hostRoom()}
+    if(err.type==='unavailable-id'){
+      NET.peer=null;NET.room='jz-'+shortId();
+      try{NET.peer=new Peer(NET.room,{debug:0});NET.peer.on('connection',onConn);NET.peer.on('open',function(){mesaMine()})}catch(e2){}
+      toast('La mesa ya estaba abierta en otra pestaña; se abrió una nueva');
+    }
   });
-  NET.peer.on('connection',function(conn){
-    conn.on('open',function(){
-      NET.conns.push(conn);
-      conn.send({t:'init',cfg:sendableCfg(),state:fullState(),me:{name:ME.name,color:ME.color}});
-      if(G.cfg.src.type==='data')sendImage(conn,G.cfg.src.data);
-    });
-    wireConn(conn);
+  NET.peer.on('connection',onConn);
+}
+function onConn(conn){
+  conn.on('open',function(){
+    NET.conns.push(conn);
+    conn.send({t:'init',cfg:sendableCfg(),state:fullState(),me:{name:ME.name,color:ME.color}});
+    if(G.cfg.src.type==='data')sendImage(conn,G.cfg.src.data);
+    mesaMine();
   });
+  wireConn(conn);
+}
+/* registrar/actualizar mi mesa en la lista local */
+var mesaTh=0;
+function mesaMine(){
+  if(!G||!NET.room||!NET.isHost)return;
+  var now=Date.now();if(now-mesaTh<4000)return;mesaTh=now;
+  mesaUpsert({room:NET.room,role:'host',saveId:G.saveId,
+    title:srcTitle(G.cfg.src),pieces:G.cols*G.rows,
+    pct:joinedCount()/(G.cols*G.rows),players:NET.conns.length+1,
+    thumb:G.cfg.src.type!=='data'?srcURL(G.cfg.src,300,220):null,
+    mx:{c:G.cols,r:G.rows,g:G.groups.filter(function(g){return g.pieces.length>1}).map(function(g){return g.pieces})},
+    link:location.origin+location.pathname+'#g='+NET.room,ts:now});
 }
 function sendableCfg(){var c=G.cfg;
-  return {src:c.src.type==='seed'?c.src:{type:'data-pending'},cols:c.cols,rows:c.rows,seed:c.seed,box:c.box,rot:c.rot}}
+  return {src:c.src.type!=='data'?c.src:{type:'data-pending'},cols:c.cols,rows:c.rows,seed:c.seed,box:c.box,rot:c.rot}}
 function sendImage(conn,durl){
   var CH=60000,n=Math.ceil(durl.length/CH);
   for(var i=0;i<n;i++)conn.send({t:'img',i:i,n:n,d:durl.slice(i*CH,(i+1)*CH)});
@@ -932,7 +1233,7 @@ function onMsg(conn,m){
     case 'bienvenida': ME.color=m.color;break;
     case 'init':
       NET.players.host={name:m.me.name,color:m.me.color};
-      if(m.cfg.src.type==='seed'){
+      if(m.cfg.src.type!=='data-pending'){
         $('m-join').classList.remove('on');
         startGame({src:m.cfg.src,cols:m.cfg.cols,rows:m.cfg.rows,seed:m.cfg.seed,box:m.cfg.box,rot:m.cfg.rot,elapsed:m.state.elapsed,state:m.state});
       } else {
@@ -1016,15 +1317,36 @@ function markPath(){
 }
 
 /* ---------- init ---------- */
+function initials(){return ME.name.trim().split(/\s+/).map(function(w){return w[0]}).join('').slice(0,2).toUpperCase()||'?'}
+function refreshWho(){$('who-btn').textContent=initials()}
 $('name-in').value=ME.name;
-$('name-in').onchange=function(){ME.name=this.value.trim()||ME.name;localStorage.setItem('jz-name',ME.name);renderPlayers()};
+$('name-in').onchange=function(){ME.name=this.value.trim()||ME.name;localStorage.setItem('jz-name',ME.name);renderPlayers();refreshWho()};
+function openCuenta(){$('name-in').value=ME.name;$('m-cuenta').classList.add('on');$('name-in').focus()}
+$('who-btn').onclick=openCuenta;
+$('who-btn-m').onclick=openCuenta;
+$('cuenta-ok').onclick=$('cuenta-close').onclick=function(){
+  ME.name=$('name-in').value.trim()||ME.name;localStorage.setItem('jz-name',ME.name);
+  refreshWho();renderPlayers();$('m-cuenta').classList.remove('on')};
+document.querySelectorAll('[data-v]').forEach(function(b){b.onclick=function(){showView(b.dataset.v)}});
+$('seek-mini').onclick=function(){showView('bib');$('lib-in').focus()};
+addEventListener('keydown',function(e){
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'&&$('scr-home').classList.contains('on')){
+    e.preventDefault();showView('bib');$('lib-in').focus()}});
+$('lib-in').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){LIB.kw=this.value.trim().toLowerCase().split(/[\s,]+/).slice(0,3).join(',');
+    document.querySelectorAll('[data-kw]').forEach(function(x){x.classList.remove('tag--on')});
+    renderLib()}});
+document.querySelectorAll('[data-kw]').forEach(function(b){
+  b.onclick=function(){LIB.kw=b.dataset.kw;$('lib-in').value='';
+    document.querySelectorAll('[data-kw]').forEach(function(x){x.classList.toggle('tag--on',x===b)});
+    renderLib()}});
+$('regal').onclick=renderLib;
 brandMark($('brand-mark'));brandMark($('brand-mark2'));
-fillGal();
-$('regal').onclick=fillGal;
-loadHome();
+refreshWho();
 NET.players={};
 var mHash=location.hash.match(/#g=([\w-]+)/);
 if(mHash){show('scr-home');joinRoom(mHash[1])}
+else showView('jugar');
 </script>
 </body>
 </html>
